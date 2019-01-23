@@ -283,7 +283,7 @@ barplot(ToPlot,
      border=NA, #no border
      main=titleText,
      sub=sourceText,
-     ylim=c(0,50),
+     ylim=c(0,50),   #c(lower y axis value, higher y axis value)
      ylab = '(in %)' # show unit
      )
 ```
@@ -304,7 +304,7 @@ location=barplot(ToPlot,
 #annotating
 text(x=location,y=ToPlot,labels=plotLabels,
      pos = 1,# if pos=3, text will be on top of bar
-     cex = 0.8) 
+     cex = 0.8) #text size for the floating percentages
 
 ```
 
@@ -321,7 +321,7 @@ location=barplot(ToPlot,
      sub=sourceText,
      ylim=c(0,50),
      ylab = '(in %)',
-     horiz = T) # ORIENTATION
+     horiz = T) # ORIENTATION, T stands for "true"
 
 #annotating
 text(x=location,y=ToPlot,labels=plotLabels,
@@ -339,7 +339,7 @@ location=barplot(ToPlot,
          sub=sourceText,
          xlim=c(0,50), #change to xlim
          xlab = '(in %)', #change to xlab
-         horiz = T)
+         horiz = T) #T stands for true, so this is literally horizontal is true
 
 #annotating
 text(x=ToPlot,y=location, #change of x and y
@@ -384,7 +384,7 @@ text(x=ToPlot,y=location,labels=plotLabels,pos = 4)
 
 # subtitle
 title(sub=sourceText, 
-      adj=0,#adj=1 aligns to rigth.
+      adj=1,#adj=1 aligns to rigth.
       cex.sub=0.7) #shrinking text
 ```
 
@@ -423,7 +423,7 @@ title(sub=sourceText, adj=0,cex.sub=0.7,
 titleText2='Are all locations getting a fair share of public schools in WA?'
 
 
-par(mgp=c(1,0.5,0)) 
+par(mgp=c(0.5,0.5,0)) 
 location=barplot(ToPlot,
          col = paletteHereNew,
          border=NA,
