@@ -1,6 +1,8 @@
 <br> 
 <center><img src="http://i.imgur.com/sSaOozN.png" width="500"></center>
 
+##Jonathan White, Winter 2019
+
 ## Course: Visual Analytics for Policy and Management
 
 ### Prof. José Manuel Magallanes, PhD 
@@ -32,9 +34,6 @@ Contents:
 
 _____
 
-Most data are commonly organized in tabular format, that is, tables. When data is in tabular format, cases are organized in rows, while variables (information about the cases) are organized in columns. Almost every data you have used in a spreadsheet follows that structure. 
-
-For example, when you visit the [website](https://nces.ed.gov/ccd/) of the Common Core of Data from the US Department of Education, you can get a data set with detailed information on public schools at the state of Washington. Let me get a data table I have based on that:
 
 
 
@@ -711,6 +710,14 @@ lolliplot3 + geom_text(nudge_x=0.3,show.legend = FALSE)
 <span style="color:red"> Exercise:<br>Complete adding the elements missing in the last plot. </span>
 
 
+
+
+
+
+
+
+##################################################
+##########Stop here, exercise to be continued ####
 
 
 
