@@ -45,7 +45,7 @@ __________
 
 link = "https://raw.githubusercontent.com/jwhite00/VisualAnalytics_2_tabularData/master/data/Link%20Data.csv"
 
-mydata=read.csv(link)
+mydata2=read.csv(link)
 
 
 ```
@@ -66,7 +66,7 @@ library(scales)
 ```{r column_Names, eval=FALSE}
 #list of the 24 columns
 
-names(mydata) 
+names(mydata2) 
 ```
 
 
@@ -78,7 +78,7 @@ names(mydata)
 
 
 # as a percentage of total
-absoluteT=table(mydata$access_mode,exclude = '#NULL!')
+absoluteT=table(mydata2$access_mode,exclude = '#NULL!')
 ToPlot=prop.table(absoluteT)
 
 #Labels for coding
@@ -98,17 +98,19 @@ names(ToPlot)[6]='Other'
 
 ```{r}
 
-#creating table to be used by ggplot
-tableFreq=as.data.frame(ToPlot)
-names(tableFreq)=c("access_mode","pct")
-tableFreq0 = tableFreq[order(-tableFreq$pct),] #setup for allowing us to order
-
 
 # preparing labels
 ToPlot*100   #CAN YOU GET RID OF THIS???
-ToPlot=ToPlot*100
-paste0(round(ToPlot,2),'%')   #CAN YOU GET RID OF THIS???
-plotLabels=paste0(round(ToPlot,2),'%')  # labels for the slices
+ToPlot1=ToPlot*100
+paste0(round(ToPlot1,2),'%')   #CAN YOU GET RID OF THIS???
+plotLabels=paste0(round(ToPlot1,2),'%')  # labels for the slices
+
+#creating table to be used by ggplot
+tableFreq=as.data.frame(ToPlot1)
+names(tableFreq)=c("access_mode","pct")
+tableFreq[order(tableFreq$pct),]
+tableFreq0 = tableFreq[order(-tableFreq$pct),] #setup for allowing us to order
+
 
 
 
@@ -123,13 +125,13 @@ plotLabels=paste0(round(ToPlot,2),'%')  # labels for the slices
 
 ```{r pieTitle_question, eval=FALSE}
 #Making the Title of the Chart
-titleText2= 'Did Getting Rid of Secured Bike Lockers Affect How Many People Bike to Light Rail Station?'
-titleText3= 'What is preventing a more equal distribution of Travel'
+titleText2= 'Did Getting Rid of Secured Bike Lockers Affect \nHow Many People Bike to Light Rail Station?'
+titleText3= 'What is preventing a more even distribution of Travel to Stations'
 sourceText='Source: Sound Transit 2015 Onboard Survey Data'
 
 
 # customizing set of colors
-paletteHere=rainbow(length(ToPlot)) 
+paletteHere=rainbow(length(ToPlot1)) 
 
 paletteHereNew=c('gray') # just one color
 
@@ -148,12 +150,10 @@ paletteHereNew=c('gray') # just one color
 We could use our reference line to show gaps or differences. In this case, the **Lollipop** plot may be useful. This one is just a replacement for a bar plot:
 
 ```{r lolli_gg, eval=FALSE}
-tableFreq[order(tableFreq$pct),]
-# reordering DF steps:
-tableFreqO=tableFreq[order(tableFreq$pct),]
+
 
 base = ggplot(tableFreq0, aes(x=access_mode,pct)) 
-lolliplot1=base + geom_segment(aes(y = 0, 
+lolliplot1=base + geom_segment(aes(y = 0,
                                    x = access_mode, 
                                    yend = pct, 
                                    xend = access_mode), color = "grey50") 
@@ -170,34 +170,40 @@ lolliplot4 = lolliplot3 + theme(panel.background = element_rect(fill = "white",
                     plot.caption = element_text(hjust = 0), # default was 1
                     plot.title = element_text(hjust = 0.5))
 
-
 lolliplot5 = lolliplot4 + scale_x_discrete(limits=tableFreqO$access_mode)
 
-lolliplot5
+lolliplot6= lolliplot5 + geom_text(aes(y = pct , 
+                            label = paste0(round(pct,2), '%')),
+                        vjust=-1, # if flipping 'hjust'
+                        size = 3)
+
+lolliplot6
 ```
 
 
 
 
 ```{r lolli_axis_gg, eval=FALSE}
+
 ####### new variable
-tableFreqO$gap=tableFreqO$pct-20
+tableFreq0$gap = (20 - tableFreq0$pct)*100
 #########
 
 # a new column for color
-tableFreqO$PositiveGap=ifelse(tableFreqO$gap>0,T,F)
+tableFreq0$PositiveGap=ifelse(tableFreq0$gap>0,T,F)
 
 # plot the new variable
-base = ggplot(tableFreqO, aes(access_mode,gap,color=PositiveGap,
-                              label = round(gap,3))) #  change
+base = ggplot(tableFreq0, aes(access_mode,gap,color=PositiveGap,
+                              label = round(gap,2))) #  change
 
 lolliplot1=base + geom_segment(aes(y = 0, 
                                    x = access_mode, 
                                    yend = gap, 
-                                   xend = access_mode), color = "gray") 
+                                   xend = access_mode), color = "gray")
+
 lolliplot2 = lolliplot1 + geom_point()
 
-lolliplot3 = lolliplot2 + scale_x_discrete(limits=tableFreqO$access_mode) # key element
+lolliplot3 = lolliplot2 + scale_x_discrete(limits=tableFreq0$access_mode) # key element
 
 
 lolliplot4 = lolliplot3 + labs(title=titleText3,
@@ -213,7 +219,11 @@ lolliplot5 = lolliplot4 + theme(panel.background = element_rect(fill = "white",
 
 
 # annotating and moving the text on the horizontal
-lolliplot6 = lolliplot5 + geom_text(nudge_x=0.3,show.legend = FALSE)  
+lolliplot6 = lolliplot5 + geom_text(aes(y = pct , 
+                            label = paste0(round(pct,2), '%')),
+                        vjust=-1, # if flipping 'hjust'
+                        size = 3, nudge_x=0.3,show.legend = FALSE)  
+
 
 lolliplot6
 

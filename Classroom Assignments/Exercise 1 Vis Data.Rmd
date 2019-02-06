@@ -45,16 +45,16 @@ __________
 
 link = "https://raw.githubusercontent.com/jwhite00/VisualAnalytics_2_tabularData/master/data/Link%20Data.csv"
 
-mydata=read.csv(link)
+mydata1=read.csv(link)
 
 
 ```
 
 
 ```{r dataDimension, eval=FALSE}
-#number of rows and columns: nrow(mydata) ncol(mydata)
+#number of rows and columns: nrow(mydata1) ncol(mydata1)
 
-dim(mydata) 
+dim(mydata1) 
 
 
 ```
@@ -63,7 +63,7 @@ dim(mydata)
 ```{r column_Names, eval=FALSE}
 #list of the 24 columns
 
-names(mydata) 
+names(mydata1) 
 ```
 
 
@@ -71,7 +71,7 @@ names(mydata)
 ```{r dataSTR, eval=FALSE}
 # data type.  'width = n,strict.width='cut' means you see n characters per row
 
-str(mydata,width = 70,strict.width='cut')
+str(mydata1,width = 70,strict.width='cut')
 
 ```
 
@@ -81,7 +81,7 @@ str(mydata,width = 70,strict.width='cut')
 #first fifty values
 #Note about data: #Null! is missing values in this data set
 
-head(mydata$access_mode,50) 
+head(mydata1$access_mode,50) 
 
 
 ```
@@ -105,10 +105,10 @@ head(mydata$access_mode,50)
 
 ```{r freqTab_abs, eval=FALSE}
 # absolute values
-table(mydata$access_mode,exclude = '#NULL!')
+table(mydata1$access_mode,exclude = '#NULL!')
 
 #saving table
-absoluteT=table(mydata$access_mode,exclude = '#NULL!')
+absoluteT=table(mydata1$access_mode,exclude = '#NULL!')
 ```
 
 
@@ -176,14 +176,14 @@ pie(x=ToPlot,#table
     col = paletteHere, 
     labels = plotLabels, cex = .58,
     main=titleText,
-    sub=sourceText)
+    sub=sourceText, radius=1.03)
 
 #legend
-legend(x="left", #where
+legend(x="bottomleft", #where
        legend=names(ToPlot), #text
        fill = paletteHere, #symbols' colors
        bty = 'n', # no box
-       cex = .7,  # shrink
+       cex = .6,  # shrink
        ) #symbols' colors
 
 
@@ -233,7 +233,7 @@ text(x=location,y=ToPlot,labels=plotLabels,
 # distance ofTicks to plot)
 # default is: mgp=c(3, 1, 0)
 
-par(mgp=c(2,1,0)) 
+par(mgp=c(1.3,0.4,0)) 
 
 
 location=barplot(ToPlot,
@@ -244,7 +244,16 @@ location=barplot(ToPlot,
          xlim=c(0,80), #change to xlim
          xlab = '(in %)', #change to xlab
          las=2,
-         horiz = T)  # ORIENTATION
+         horiz = T, xaxt="n")  # ORIENTATION
+
+
+
+# customizing tick values
+newXvalues<-c(0,10,20,40,80) # you just want to show this on the axis
+axis(side=1, 
+     at=newXvalues, 
+     labels = newXvalues,
+     cex.axis=0.8)
 
 #annotating
 
@@ -262,11 +271,11 @@ title(sub=sourceText, adj=0,cex.sub=0.7,
 
 ```{r refLine_bar, eval=FALSE}
 
-titleText2='Did Getting Rid of Secured Bike Lockers Affect How Many People Bike to Light Rail Station?'
+titleText2='Did Getting Rid of Secured Bike Lockers Affect \nHow Many People Bike to Light Rail Station?'
 
 sub2='2016 Survey Shows 10% of riders used to bike to stations'
 
-par(mgp=c(1,0.5,0)) 
+par(mgp=c(1.4,0.4,0)) 
 location=barplot(ToPlot,
          col = paletteHereNew,
          border=NA,
@@ -350,7 +359,7 @@ plot2 = plot1 + theme(panel.background = element_rect(fill = "white",
 
 
 #Adding Titles/Labels
-plot3 = plot2 + labs(title=titleText2,
+plot3 = plot2 + labs(title=titleText2, 
                      x ='Access Mode', 
                      y = '%',
                      caption = sub2)
