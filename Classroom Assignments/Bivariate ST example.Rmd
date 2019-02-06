@@ -37,30 +37,31 @@ We analyze two variables to find out if there might be some kind of association 
 
 As before, the nature of the data allows for some particular analytical techniques, while also providing some limitations to our inferences. Let's see what we can visualize with the different combinations of data.
 
-This time, I will use the [data about crime](https://data.seattle.gov/Public-Safety/Crime-Data/4fs7-3vj5) from the Seattle Open Data portal:
+This time, I will use the [data about mydata4](https://data.seattle.gov/Public-Safety/mydata4-Data/4fs7-3vj5) from the Seattle Open Data portal:
 
 ```{r collect, eval=FALSE}
-link="https://github.com/EvansDataScience/data/raw/master/crime.RData"
-load(file = url(link))
+link="https://raw.githubusercontent.com/jwhite00/Group-Project-Data-Vis/master/Link%20Data%20master.csv"
+mydata4=read.csv(link)
 ```
+
 
 
 The data available are:
 
 ```{r names, eval=FALSE}
-names(crime)
+names(mydata4)
 
 ```
 
 A quick look will give us:
 ```{r head, eval=FALSE}
-head(crime)
+head(mydata4)
 ```
 
 Let's see what kind of data we have:
 
 ```{r str, eval=FALSE}
-str(crime,width = 70,strict.width='cut')
+str(mydata4,width = 70,strict.width='cut')
 ```
 
 
@@ -72,35 +73,35 @@ _____
 
 ## Categorical-Categorical relationships
 
-The main way to organize these relationships are the contingency tables. Let's select a couple of categorical variables:
 
 ```{r table, eval=FALSE}
-(CrimeTotal=table(crime$crimecat,crime$Occurred.DayTime))
+(mydata4Total=table(mydata4$timeperiod,mydata4$access_mode)) #provides count
 ```
 
-
-The table above shows counts, but in most situations, it is important to see relative values:
 
 ```{r table_rel_PIPES,eval=FALSE}
 # using "pipes" to help readability:
 library(magrittr)
-(CrimeTotal=table(crime$crimecat,crime$Occurred.DayTime)%>% #create table and then...
+(mydata4Total=table(mydata4$access_mode,mydata4$timeperiod)%>% #create relative values table and then...
+
         prop.table() %>% #compute proportion and then...
         "*"(100)%>% # multiply by 100 and then...
         round(2) #...round to to decimals
         )
 ```
 
-Those tables show total counts or percents. However, when a table tries to hypothesize a relationship, you should have the _independent_ variable in the columns, and the _dependent_ one in the rows; then, the percent should be calculated by column, to see how the levels of the dependent variable varies by each level of the independent one, and compare along rows.
+Those tables show total counts or percents. However, when a table tries to hypothesize a relationship, you should have the _independent_ variable in the columns, and the _dependent_ one in the rows; then, 
 
 
 ```{r table_byCol,eval=FALSE}
-CrimeCol=table(crime$crimecat,crime$Occurred.DayTime)%>%
+mydata4Col=table(mydata4$access_mode,mydata4$timeperiod)%>% 
          prop.table(margin = 2)%>%   # 2 is % by column
          "*"(100)%>%
          round(3)
 
-CrimeCol
+#the percent should be calculated by column, to see how the levels of the dependent variable varies by each level of the independent one, and compare along rows. W/ indep into columns, dependent into rows
+
+mydata4Col
 ```
 
 
@@ -110,7 +111,7 @@ The complexity of two variables requires plots, as tables like these will not al
 As before, we can use the bar plot with the contingency table as input:
 
 ```{r BADplot,eval=FALSE}
-barplot(CrimeCol)
+barplot(mydata4Col)
 ```
 
 This plot will need a lot of work, so the base capabilities of R may not be a good strategy.  
@@ -118,21 +119,21 @@ This plot will need a lot of work, so the base capabilities of R may not be a go
 However, when using alternative/more specialized plotting features you may need to convert your table into a dataframe of frequencies, let me create the base proportions table:
 
 ```{r convertToDFgg,eval=FALSE}
-df.T=as.data.frame(CrimeTotal) # table of proportion based on total
+df.T=as.data.frame(mydata4Total) # table of proportion based on total
 # YOU GET:
 head(df.T)
 ```
 
 We should rename the above table:
 ```{r, eval=FALSE}
-names(df.T)=c('Crime','Daytime','Percent') #renaming
+names(df.T)=c('TravelMode','TimeofDay','Percent') #renaming
 head(df.T)
 ```
 
 A first option you may have is to reproduce the table:
 ```{r plotTable_gg, eval=FALSE}
 library(ggplot2)                           
-base = ggplot(df.T, aes(Daytime,Crime)) 
+base = ggplot(df.T, aes(TimeofDay, TravelMode)) 
 # plot value as point, size by value of percent
 tablePlot1 = base + geom_point(aes(size = Percent), colour = "gray") 
 # add value of Percent as label, move it
@@ -144,7 +145,7 @@ tablePlot2
 
 ...some more work:
 ```{r, eval=FALSE}
-tablePlot3 = tablePlot2 + scale_size_continuous(range=c(0,10)) #change 10?
+tablePlot3 = tablePlot2 + scale_size_continuous(range=c(0,10)) #change 10? this changes the size and makes the large numbers much bigger 
 tablePlot4 = tablePlot3 + theme_minimal() # less ink
 tablePlot4 + theme(legend.position="none") # no legend
 ```
@@ -155,10 +156,10 @@ tablePlot4 + theme(legend.position="none") # no legend
 The plot looks nice, but unless the differences are clearly cut, you may see more noise than information, which distracts and delays decision making. Keep in mind that _length_ of bars are easier to compare than circle _areas_. You need a barplot, but with better tools:
 
 ```{r facet, eval=FALSE}
-base  = ggplot(df.T, aes(x = Crime, y = Percent ) ) 
+base  = ggplot(df.T, aes(x = TravelMode, y = Percent ) ) 
 bars1 = base + geom_bar( stat = "identity" ) + theme_minimal()
 # bar per day time with 'facet'
-bars2 = bars1 + facet_wrap( ~ Daytime ,nrow = 1) 
+bars2 = bars1 + facet_wrap( ~ TimeofDay ,nrow = 1) 
 
 bars3 = bars2 + theme( axis.text.x = element_text(angle = 90,
                                                   hjust = 1,
@@ -177,22 +178,22 @@ bars3
 And, the original relationship Input-Output table can be plotted like this:
 
 ```{r flip_facet, eval=FALSE}
-df.C=as.data.frame(CrimeCol)
-colnames(df.C)=c('Crime','Daytime','Percent')
+df.C=as.data.frame(mydata4Col)
+colnames(df.C)=c('TravelMode','TimeofDay','Percent')
 #####
 
-base  = ggplot(df.C, aes(x = Crime, y = Percent ) ) 
+base  = ggplot(df.C, aes(x = TravelMode, y = Percent ) ) 
 bars1 = base + geom_bar( stat = "identity" )
-bars2 = bars1 + facet_wrap( ~ Daytime ,nrow = 1) 
+bars2 = bars1 + facet_wrap( ~ TimeofDay ,nrow = 1) 
 bars2 + coord_flip()
 ```
 
-The type of crime is not ordinal, then we could reorder the bars:
+The type of mydata4 is not ordinal, then we could reorder the bars:
 
 ```{r orderFacet, eval=FALSE}
-base  = ggplot(df.C, aes(x = reorder(Crime, Percent), y = Percent ) ) 
+base  = ggplot(df.C, aes(x = reorder(TravelMode, Percent), y = Percent ) ) 
 bars1 = base + geom_bar( stat = "identity" )
-bars2 = bars1 + facet_wrap( ~ Daytime ,nrow = 1) 
+bars2 = bars1 + facet_wrap( ~ TimeofDay ,nrow = 1) 
 bars2 + coord_flip() + theme(axis.text.y = element_text(size=4,angle = 45)) 
 ```
 
@@ -204,7 +205,7 @@ Once you see a plot of two bivariate categorical data, you may consider other pl
 
 ```{r heatDescending, eval=FALSE}
 # heatplot
-base  = ggplot(df.C, aes(x = Daytime, y = reorder(Crime, Percent), fill = Percent)) 
+base  = ggplot(df.C, aes(x = TimeofDay, y = reorder(TravelMode, Percent), fill = Percent)) 
 heat1 = base +  geom_tile() 
 heat2 = heat1 +scale_fill_gradient(low = "white", 
                                    high = "black")
@@ -223,7 +224,7 @@ heat4 = heat3 + theme(axis.text.x = element_text(angle = 90, vjust = 0.6),
                       legend.key.width=unit(1, "cm"),
                       legend.key.height=unit(1, "cm")) 
 
-heat4 + labs(y="Crime")
+heat4 + labs(y="TravelMode")
 ```
 
 <a id='ex2'></a>
@@ -235,40 +236,43 @@ _____
 
 <a id='part3'></a>
 
-## Categorical-Numerical relationships
+
+
+
+########################### Categorical-Numerical relationships########################### 
 
 Similar to the previous case, categorical variables can be used for understanding the behavior of numerical variables. In this case, the curiosity and experience of the analyst is critical in mining the data to reveal some insight. This is so because numerical data have longer value ranges than categorical data. The data used will be a good example of this.
 
-In the previous data set we had a variable that informs the amount of days it takes someone to report a crime:
+In the previous data set we had a variable that informs the amount of days it takes someone to report a mydata4:
 
 ```{r summaryTime, eval=FALSE}
-summary(crime$DaysToReport)
+summary(mydata4$DaysToReport)
 ```
 
 
 There are several good categorical variables that can be used to study the behavior of this one. Let's use _precint_:
 
 ```{r tapply, eval=FALSE}
-tapply(crime$DaysToReport,crime$Precinct,mean)
+tapply(mydata4$DaysToReport,mydata4$Precinct,mean)
 ```
 
 
-Above, you see the mean time (in days) it takes per precint for people to notify a crime. You can suddenly create a plot in your mind just by reading those values, but the plot you imagine may be far from this one:
+Above, you see the mean time (in days) it takes per precint for people to notify a mydata4. You can suddenly create a plot in your mind just by reading those values, but the plot you imagine may be far from this one:
 
 ```{r,boxNumCat1, eval=FALSE}
-boxplot(DaysToReport~Precinct,data=crime)
+boxplot(DaysToReport~Precinct,data=mydata4)
 ```
 
 The plot above would not give so much insight, there is so much noise. The fact is that a better summary would tell us more to consider:
 
 ```{r, tapplySummary, eval=FALSE}
-tapply(crime$DaysToReport,crime$Precinct,summary)
+tapply(mydata4$DaysToReport,mydata4$Precinct,summary)
 ```
 
-From the information above, you know that for each precint, the 75% of crimes are reported in a day or less. If we consider that situation as the expected behavior, we could omit those cases:
+From the information above, you know that for each precint, the 75% of mydata4s are reported in a day or less. If we consider that situation as the expected behavior, we could omit those cases:
 
 ```{r boxDaysToRep, eval=FALSE}
-boxplot(DaysToReport~Precinct,data=crime,
+boxplot(DaysToReport~Precinct,data=mydata4,
         subset = DaysToReport>1) #subsetting
 ```
 
@@ -278,97 +282,97 @@ We see no structure appear yet. Let me try different versions while teaching how
 ```{r parMFROW, eval=FALSE}
 par(mfrow=c(2,2)) # 2 rows, and two columns, by row:
 
-boxplot(DaysToReport~Precinct,data=crime,subset = DaysToReport>=7,
+boxplot(DaysToReport~Precinct,data=mydata4,subset = DaysToReport>=7,
         main="One week or more")
 
-boxplot(DaysToReport~Precinct,data=crime,subset = DaysToReport>=30,
+boxplot(DaysToReport~Precinct,data=mydata4,subset = DaysToReport>=30,
         main="One 30-day month or more")
 
-boxplot(DaysToReport~Precinct,data=crime,subset = DaysToReport>=180,
+boxplot(DaysToReport~Precinct,data=mydata4,subset = DaysToReport>=180,
         main="180 days or more")
 
-boxplot(DaysToReport~Precinct,data=crime,subset = DaysToReport>=365,
+boxplot(DaysToReport~Precinct,data=mydata4,subset = DaysToReport>=365,
         main="One year or more")
 ```
 
-Up to this point, you need to be planing a good _story_. The situation is different for each case, but let's build our story from the crimes that take a year or longer to report.
+Up to this point, you need to be planing a good _story_. The situation is different for each case, but let's build our story from the mydata4s that take a year or longer to report.
 
 First, let's see how many cases we have per precinct:
 
-```{r crimeTapply, eval=FALSE}
-crimeYear=crime[crime$DaysToReport>=365,]
-tapply(crimeYear$DaysToReport,crimeYear$Precinct,length)
+```{r mydata4Tapply, eval=FALSE}
+mydata4Year=mydata4[mydata4$DaysToReport>=365,]
+tapply(mydata4Year$DaysToReport,mydata4Year$Precinct,length)
 ```
 
-The year the crime occurred would be another variable to consider, to see if we can filter more cases:
+The year the mydata4 occurred would be another variable to consider, to see if we can filter more cases:
 
 ```{r casesTapplycount, eval=FALSE}
-tapply(crimeYear$DaysToReport,crimeYear$year,length)
+tapply(mydata4Year$DaysToReport,mydata4Year$year,length)
 ```
 
 If we were to plot by year, several years before 2000 are too few (cases with two or less may require a case study-  some might even be typing mistakes). Let's get rid of those old cases:
 
-```{r crimeAfter2000, eval=FALSE}
-crimeY2000=crime[(crime$DaysToReport>=365) & (crime$year>=2000),]
-tapply(crimeY2000$DaysToReport,crimeY2000$Precinct,length)
+```{r mydata4After2000, eval=FALSE}
+mydata4Y2000=mydata4[(mydata4$DaysToReport>=365) & (mydata4$year>=2000),]
+tapply(mydata4Y2000$DaysToReport,mydata4Y2000$Precinct,length)
 ```
 
 Now, we see a better boxplot:
 ```{r boxpAfter2000, eval=FALSE}
-boxplot(DaysToReport~Precinct,data=crimeY2000,
+boxplot(DaysToReport~Precinct,data=mydata4Y2000,
         main="One year or more (from 2000)")
 ```
 
 For sure, it would be better if the numerical units  were in years:
 
 ```{r convertYear, eval=FALSE}
-crimeY2000$YearsToReport=crimeY2000$DaysToReport/365
-boxplot(YearsToReport~Precinct,data=crimeY2000,
+mydata4Y2000$YearsToReport=mydata4Y2000$DaysToReport/365
+boxplot(YearsToReport~Precinct,data=mydata4Y2000,
         main="One year or more (from 2000)")
 ```
 
 This is a good data subset, but you still see that the distribution is pretty similar in every precint. At this stage, you can try visualizing the outliers distributions, which start around year five:
 
 ```{r yearsGT5, eval=FALSE}
-boxplot(YearsToReport~Precinct,data=crimeY2000,subset = YearsToReport>=5,
+boxplot(YearsToReport~Precinct,data=mydata4Y2000,subset = YearsToReport>=5,
         main="Five years or more (from 2000)")
 ```
 
 If your story is about the similarity of distributions among precincts, you can start improving the last plots. But in case you need to show some variety you can try another relevant categorical variable.
 
-Let's try _weekday_ and _Ocurred.DayTime_:
+Let's try _weekday_ and _Ocurred.Time of Day_:
 
 
 ```{r exploreCatBOX, eval=FALSE}
 
 par(mfrow=c(2,1))
 
-boxplot(YearsToReport~weekday,data=crimeY2000,
+boxplot(YearsToReport~weekday,data=mydata4Y2000,
         main="One year or more BY WEEKDAY (from 2000)",las=2)
 
-boxplot(YearsToReport~Occurred.DayTime,data=crimeY2000,
-        main="One year or more BY TIME CRIME OCCURRED (from 2000)",las=2)
+boxplot(YearsToReport~access_mode,data=mydata4Y2000,
+        main="One year or more BY TIME mydata4 OCCURRED (from 2000)",las=2)
 
 ```
 
-Not much variety is perceived; then let's try _crimecat_ and _year_:
+Not much variety is perceived; then let's try _timeperiod_ and _year_:
 
 ```{r exploreBOX2, eval=FALSE}
 par(mfrow=c(2,1))
 
-boxplot(YearsToReport~year,data=crimeY2000,
+boxplot(YearsToReport~year,data=mydata4Y2000,
         main="One year or more (from 2000)",las=2)
 
-boxplot(YearsToReport~crimecat,data=crimeY2000,
+boxplot(YearsToReport~timeperiod,data=mydata4Y2000,
         main="One year or more (from 2000)",las=2)
 ```
 
 Years to report seems interesting, you have a decreasing tendency, then we can spend some time improving it via ggplot:
 ```{r yearsToRep, eval=FALSE}
 # no missing:
-crimeYearGG=crimeY2000[complete.cases(crimeY2000$YearsToReport),]
+mydata4YearGG=mydata4Y2000[complete.cases(mydata4Y2000$YearsToReport),]
 
-base = ggplot(crimeYearGG,aes(x=factor(year), y=YearsToReport)) 
+base = ggplot(mydata4YearGG,aes(x=factor(year), y=YearsToReport)) 
 box  = base + geom_boxplot()
 box
 ```
@@ -377,7 +381,7 @@ It may be the case that your audience does not know how to read a boxplot. It is
 
 ```{r boxBYE, eval=FALSE}
 
-base  = ggplot(crimeYearGG,aes(x=factor(year), y=YearsToReport))
+base  = ggplot(mydata4YearGG,aes(x=factor(year), y=YearsToReport))
 mins = base + stat_summary(fun.y=min, # function for 'y' is min()
                            geom="line",
                            show.legend = T,size=1,
@@ -419,23 +423,23 @@ all1
 ```
 
 
-Now, let's complete the story by telling how the data filtered behaves, that is, the crimes that took less than a year to report since 2000 (we will not include data from before):
+Now, let's complete the story by telling how the data filtered behaves, that is, the mydata4s that took less than a year to report since 2000 (we will not include data from before):
 
-```{r crimeWeek, eval=FALSE}
+```{r mydata4Week, eval=FALSE}
 # data preparation:
 
-crimeWeek=crime[(crime$DaysToReport<365) & (crime$year>=2000),]
+mydata4Week=mydata4[(mydata4$DaysToReport<365) & (mydata4$year>=2000),]
 
-crimeWeek$WeeksToReport=crimeWeek$DaysToReport/7
+mydata4Week$WeeksToReport=mydata4Week$DaysToReport/7
 
-crimeYearGG2=crimeWeek[complete.cases(crimeWeek$WeeksToReport) &complete.cases(crimeWeek$crimecat),]
+mydata4YearGG2=mydata4Week[complete.cases(mydata4Week$WeeksToReport) &complete.cases(mydata4Week$timeperiod),]
 
 
 ```
 
-```{r plotCrimeWeek, eval=FALSE}
+```{r plotmydata4Week, eval=FALSE}
 #plotting it:
-base = ggplot(crimeYearGG2,aes(x=factor(year), y=WeeksToReport)) 
+base = ggplot(mydata4YearGG2,aes(x=factor(year), y=WeeksToReport)) 
 mins = base + stat_summary(fun.y=min,size=1,
                            geom="line", linetype='dashed',show.legend = T,
                            aes(group=1,col='Min'))
@@ -451,11 +455,11 @@ all2=minsMaxsMd + scale_colour_manual(name="Trends",
 all2 
 ```
 
-We also found variability in the type of crime, so we could try a story with it; first with Years to report (for crimes that took a year or longer to report, after year 2000):
+We also found variability in the type of mydata4, so we could try a story with it; first with Years to report (for mydata4s that took a year or longer to report, after year 2000):
 
-```{r byCrime, eval=FALSE}
-base= ggplot(crimeYearGG,
-             aes(x = reorder(crimecat, YearsToReport, FUN = max), # reorder!
+```{r bymydata4, eval=FALSE}
+base= ggplot(mydata4YearGG,
+             aes(x = reorder(timeperiod, YearsToReport, FUN = max), # reorder!
                  y=YearsToReport)) 
 mins = base + stat_summary(fun.y=min,size=1,
                            geom="line", linetype='dashed',show.legend = T,
@@ -471,11 +475,11 @@ all3=minsMaxsMd + scale_colour_manual(name="Trends",
 all3 + coord_flip()
 ```
 
-Now, for crimes that took less than  year to report after year 2000:
+Now, for mydata4s that took less than  year to report after year 2000:
 
-```{r byCrime2, eval=FALSE}
-base = ggplot(crimeYearGG2,
-              aes(x = reorder(crimecat, WeeksToReport, FUN = max),
+```{r bymydata42, eval=FALSE}
+base = ggplot(mydata4YearGG2,
+              aes(x = reorder(timeperiod, WeeksToReport, FUN = max),
                   y=WeeksToReport)) 
 mins = base + stat_summary(fun.y=min,size=1,
                            geom="line", linetype='dashed',show.legend = T,
@@ -499,7 +503,7 @@ It is very common to hear in scientific texts about the mean difference test kno
 
 ```{r anova, eval=FALSE}
 #making a subset:
-anovaData=crimeY2000[crimeY2000$YearsToReport>=5,]
+anovaData=mydata4Y2000[mydata4Y2000$YearsToReport>=5,]
 
 #checking the mean per factor value:
 tapply(anovaData$YearsToReport, anovaData$Precinct, mean,na.rm=T)
@@ -547,21 +551,21 @@ The study of bivariate relationships among numerical variables is known as corre
 
 * Aggregating days to report and neighborhood:
 ```{r aggregate, eval=FALSE}
-# 1. MEAN of days it takes to report a crime by neighborhood
-daysByNeigh=tapply(crime$DaysToReport, crime$Neighborhood, mean,na.rm=T)
+# 1. MEAN of days it takes to report a mydata4 by neighborhood
+daysByNeigh=tapply(mydata4$DaysToReport, mydata4$Neighborhood, mean,na.rm=T)
 
 # you have:
 head(daysByNeigh)
 ```
 
-* Aggregating crimes by neighborhood
+* Aggregating mydata4s by neighborhood
 ```{r, eval=FALSE}
-# 2. PROPORTION of crimes by neighborhood
-crimesByNeigh=tapply(crime$crimecat, crime$Neighborhood, length)%>%      
+# 2. PROPORTION of mydata4s by neighborhood
+mydata4sByNeigh=tapply(mydata4$timeperiod, mydata4$Neighborhood, length)%>%      
                      prop.table()%>%
                      "*"(100)%>% 
                      round(2) 
-head(crimesByNeigh)
+head(mydata4sByNeigh)
 ```
 
 
@@ -575,13 +579,13 @@ Knowing how it works, we can create two data frames:
 
 ```{r TOdataFrame, eval=FALSE}
 daysByNeigh=as.data.frame(daysByNeigh)%>%rownames_to_column()
-crimesByNeigh=as.data.frame(crimesByNeigh)%>%rownames_to_column()
+mydata4sByNeigh=as.data.frame(mydata4sByNeigh)%>%rownames_to_column()
 ```
 
 * Merging the two dataframes: Since both data frames have the same neighboorhood, we can make one data frame by mergeing them:
 
 ```{r mergeDFS, eval=FALSE}
-num_num=merge(daysByNeigh,crimesByNeigh) # 'row name' is the "key"
+num_num=merge(daysByNeigh,mydata4sByNeigh) # 'row name' is the "key"
 head(num_num)
 ```
 
@@ -589,7 +593,7 @@ head(num_num)
 Once we have the data organized, the clear option is the scatterplot:
 
 ```{r scatter, eval=FALSE}
-base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh)) 
+base = ggplot(num_num, aes(daysByNeigh,mydata4sByNeigh)) 
 plot1= base +  geom_point() 
 plot1
 ```
@@ -598,18 +602,18 @@ We can improve the plot, this time introducing **ggrepel**:
 
 ```{r ggscatter, eval=FALSE}
 library(ggrepel)
-base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh,
+base = ggplot(num_num, aes(daysByNeigh,mydata4sByNeigh,
                            label=rowname)) # you need this aesthetics!
 plot1= base +  geom_point() 
 plot1 + geom_text_repel()
 ```
 
-We can limit the labels, annotating the ones that represent at least 5% of the crimes in the city:
+We can limit the labels, annotating the ones that represent at least 5% of the mydata4s in the city:
 
 ```{r, eval=FALSE}
-base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh,label=rowname)) 
+base = ggplot(num_num, aes(daysByNeigh,mydata4sByNeigh,label=rowname)) 
 plot1= base +  geom_point() 
-plot1 + geom_text_repel(aes(label=ifelse(crimesByNeigh>=5,
+plot1 + geom_text_repel(aes(label=ifelse(mydata4sByNeigh>=5,
                                          num_num$rowname, "")))
 ```
 
@@ -618,16 +622,16 @@ plot1 + geom_text_repel(aes(label=ifelse(crimesByNeigh>=5,
 Notice the difference without ggrepel:
 
 ```{r simpleScatter,eval=FALSE}
-base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh)) 
+base = ggplot(num_num, aes(daysByNeigh,mydata4sByNeigh)) 
 scatp1 = base +  geom_point() 
-scatp1 + geom_text(aes(label=ifelse(crimesByNeigh>=5,num_num$rowname, "")))
+scatp1 + geom_text(aes(label=ifelse(mydata4sByNeigh>=5,num_num$rowname, "")))
 ```
 
 
 The good thing is that **ggrepel** makes better use of the space:
 
 ```{r scatterSEARCH, eval=FALSE}
-base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh,label=rowname)) 
+base = ggplot(num_num, aes(daysByNeigh,mydata4sByNeigh,label=rowname)) 
 base +  geom_point() + geom_text_repel(aes(label=ifelse(num_num$rowname=='NORTHGATE',
                                                         num_num$rowname, "")))
 ```
@@ -635,9 +639,9 @@ base +  geom_point() + geom_text_repel(aes(label=ifelse(num_num$rowname=='NORTHG
 
 An alternative, to highlight overlaping of points:
 ```{r hexbins, eval=FALSE}
-base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh)) 
+base = ggplot(num_num, aes(daysByNeigh,mydata4sByNeigh)) 
 scatp1 = base +  geom_hex(bins = 10)
-scatp2= scatp1 + geom_text_repel(aes(label=ifelse(crimesByNeigh>=5,
+scatp2= scatp1 + geom_text_repel(aes(label=ifelse(mydata4sByNeigh>=5,
                                                   num_num$rowname,
                                                   ""))) 
 scatp2 + scale_fill_distiller(palette ="Greys",direction=1) # try -1
@@ -646,10 +650,10 @@ scatp2 + scale_fill_distiller(palette ="Greys",direction=1) # try -1
 The palettes can be selected from the [brewer colors website](http://colorbrewer2.org). Using the same palette as before, we can try a different plot (stat_density_2d):
 
 ```{r density,eval=FALSE}
-base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh)) 
+base = ggplot(num_num, aes(daysByNeigh,mydata4sByNeigh)) 
 scatp1 = base +  stat_density_2d(aes(fill = ..density..), 
                                  geom = "raster", contour = FALSE)
-scatp2=scatp1+geom_text_repel(aes(label=ifelse(crimesByNeigh>=5,
+scatp2=scatp1+geom_text_repel(aes(label=ifelse(mydata4sByNeigh>=5,
                                                num_num$rowname, "")))
 scatp3 = scatp2 +  theme(legend.position='none') 
 scatp4= scatp3 + scale_fill_distiller(palette="Greys", direction=1) 
