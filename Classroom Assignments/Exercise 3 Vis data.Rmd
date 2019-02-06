@@ -49,6 +49,134 @@ load(file=url(link))
 
 
 
+
+
+
+
+
+
+
+
+<a id='part312'></a>
+
+#### <span style="color:blue"> 2. Visualization for ordinal scales</span>
+
+For this section, we will use the variable that tells us the highest grade offered in a school. A simple exploration gives:
+
+```{r ordinalTable, eval=FALSE}
+table(mydata$High.Grade,exclude = 'nothing')
+```
+
+Being a categorical variable, the default option is again the bar plot. So let's prepare the frequency table as a data frame:
+
+```{r tableAsDF, eval=FALSE}
+frqTabO=as.data.frame(prop.table(table(mydata$High.Grade)))
+names(frqTabO)=c('grade','pct')
+frqTabO
+```
+
+Now, we can use ggplot:
+
+```{r ordTable_gg, eval=FALSE}
+
+base = ggplot(frqTabO,aes(x=grade,y=pct))
+base + geom_bar(stat = 'identity') 
+```
+
+
+
+
+
+The x-values in this variable have **order**. That is, there is an increasing level in the values. Whenever we have an ordering, besides *concentration* we can visualize **symmetry**: if there is bias towards lower or higher values. 
+
+Bar plots help you see concentration and symmetry, but we have an alternative way to clearly detect symmetry, via **boxplots**:
+
+```{r boxplot_gg, eval=FALSE}
+# boxplots do not use frequency tables
+
+# as.numeric produces turns levels of the factor into numbers
+box1 = ggplot(mydata, aes(y=as.numeric(High.Grade))) 
+box1 = box1 + geom_boxplot() + coord_flip() # to show it horizontally
+
+box1
+```
+
+You have symmetry when the distance of those whiskers to the  box is the same, and when the thick line is in the middle of the box. You can see that the values show a negative asymmetry (tail to the left).
+
+you can't use this analysis of symmetry with nominal values because they have no middle to be referenced against 
+
+Box plots expect a numeric value as an input, but we have an ordered categorical, so we used the _as.numeric()_ function. However, that eliminated the levels we saw in the previous bar plot; we can put the levels back in our plot:
+
+```{r boxplot_axis_labels, eval=FALSE}
+# the labels use the original ordinal levels
+ordLabels= levels(mydata$High.Grade)
+
+box2 = box1 + scale_y_continuous(labels=ordLabels,breaks=1:15)
+box2
+```
+
+```{r}
+
+box3 = box2 + theme(panel.background = element_rect(fill = "white",
+                                                    colour = "grey50")) +aes( main= 'Title')
+
+                    
+box3
+
+
+```
+
+
+
+Box plots have important statistical information. The beginning and the ending of the box indicates the first (q1) and the third quantile (q75); and the thicker line in the middle represents the median. All those values are clearly visible, but we can retrieve the values like this:
+
+```{r box_quarts, eval=FALSE}
+#get positions
+# using 'ggplot_build'
+pos_q1=     ggplot_build(box2)$data[[1]]$lower
+pos_median= ggplot_build(box2)$data[[1]]$middle
+pos_q3=     ggplot_build(box2)$data[[1]]$upper
+
+# using
+levels(mydata$High.Grade)[c(pos_q1,pos_median,pos_q3)]
+```
+
+From the information retrieved, we know:
+
+* 25% of the public Schools offer at most 5th GRADE. 
+* 50% of the public Schools offer at most 8th GRADE.
+* 75% of the public Schools offer at most 12th GRADE. Also, 25% of the schools offer at least 12th grade.
+
+We can find these results with a _detailed_ frequency table; that is, instead of using the command _table_ as we did before, we could try a more advanced function:
+
+```{r advancedTable, warning=FALSE,results='asis', eval=FALSE}
+library(summarytools)
+freq(mydata$High.Grade,style = 'rmarkdown')
+```
+
+
+
+<span style="color:red"> Exercise:<br> Make sure our box plot follows the same design approach and include all the elements as in the bar plot for nominal data.
+</span>
+
+
+[Go to table of contents.](#part1)
+
+<a id='part32'></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ### Counting
 
 Counting expresses numerical values. They could be represented with bar plots if their frequency table had few different values. For example, the variable _Reduced.Lunch_ informs how many kids there are in each school that have that lunch for a reduced price.

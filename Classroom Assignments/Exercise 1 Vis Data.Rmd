@@ -106,19 +106,23 @@ head(mydata$access_mode,50)
 ```{r freqTab_abs, eval=FALSE}
 # absolute values
 table(mydata$access_mode,exclude = '#NULL!')
+
+#saving table
+absoluteT=table(mydata$access_mode,exclude = '#NULL!')
 ```
 
 
 ```{r freqTab_rel, eval=FALSE}
 # as a percentage of total
-absoluteT=table(mydata$access_mode,exclude = '#NULL!')
 prop.table(absoluteT)
 
+#saving table
+ToPlot=prop.table(absoluteT)
 ```
 
 
 ```{r namesFre_NA, eval=FALSE}
-ToPlot=prop.table(absoluteT)
+
 names(ToPlot)
 ```
 
@@ -151,7 +155,7 @@ plotLabels=paste0(round(ToPlot,2),'%')  # labels for the slices
 ```{r pieTitle_question, eval=FALSE}
 #Making the Title of the Chart
 
-titleText='How are people getting to Link Light Rail Stations'
+titleText='How are people getting to Link Light Rail Stations?'
 sourceText='Source: Sound Transit 2015 Onboard Survey Data'
 
 
@@ -170,16 +174,16 @@ paletteHereNew=c('gray') # just one color
 
 pie(x=ToPlot,#table
     col = paletteHere, 
-    labels = plotLabels,
+    labels = plotLabels, cex = .58,
     main=titleText,
     sub=sourceText)
 
 #legend
-legend(x="right", #where
+legend(x="left", #where
        legend=names(ToPlot), #text
        fill = paletteHere, #symbols' colors
        bty = 'n', # no box
-       cex = 0.5  # shrink
+       cex = .7,  # shrink
        ) #symbols' colors
 
 
@@ -203,14 +207,15 @@ location=barplot(ToPlot,
      col = paletteHereNew,
      border=NA,
      main=titleText,
-     sub=sourceText,
-     ylim=c(0,50),
-     ylab = '(in %)')
+     sub=sourceText,  
+     cex.names = 0.5, #shrink category names
+     ylim=c(0,85),
+     ylab = '(in %)', cex=0.75)
 
 #annotating
 text(x=location,y=ToPlot,labels=plotLabels,
-     pos = 1,# if pos=3, text will be on top of bar
-     cex = 0.8) 
+     pos = 3,# pos=3, text will be on top of bar
+     cex = 0.7) 
 
 ```
 
@@ -220,28 +225,6 @@ text(x=location,y=ToPlot,labels=plotLabels,
 ```{r categoryNames, eval=FALSE}
 #Flipping the Bar Graph Horizontal
 
-
-location=barplot(ToPlot,
-         col = paletteHereNew,
-         border=NA,
-         main=titleText,
-         cex.names = 0.5, #shrink category names
-         xlim=c(0,50), #change to xlim
-         xlab = '(in %)', #change to xlab
-         horiz = T)  # ORIENTATION
-
-#annotating
-text(x=ToPlot,y=location, #change of x and y
-     labels=plotLabels,
-     pos = 4)  # change position of the label
-
-
-title(sub=sourceText, 
-      adj=0,#adj=1 aligns to rigth.
-      cex.sub=0.7) #shrinking text
-
-
-
 ###* To have the label of the x-axis closer to the axis itself, we need to alter the _graphical parameters_:
 
 # changing parameters
@@ -250,29 +233,28 @@ title(sub=sourceText,
 # distance ofTicks to plot)
 # default is: mgp=c(3, 1, 0)
 
-par(mgp=c(0.5,0.5,0)) 
-#####
+par(mgp=c(2,1,0)) 
+
 
 location=barplot(ToPlot,
          col = paletteHereNew,
          border=NA,
          main=titleText,
-         xlim=c(0,50), 
-         xlab = '(in %)',
-         cex.names = 0.6,
-         cex.lab=0.6, # shrinking label text
-         horiz = T) 
+         cex.names = 0.4, #shrink category names
+         xlim=c(0,80), #change to xlim
+         xlab = '(in %)', #change to xlab
+         las=2,
+         horiz = T)  # ORIENTATION
 
-text(x=ToPlot,y=location,labels=plotLabels,pos = 4) 
+#annotating
+
+text(x=ToPlot,y=location,labels=plotLabels,pos = 4, cex=0.5) 
 
 title(sub=sourceText, adj=0,cex.sub=0.7,
       line = 3) #push the text down
 
 
-
-
 ```
-
 
 
 
@@ -280,70 +262,45 @@ title(sub=sourceText, adj=0,cex.sub=0.7,
 
 ```{r refLine_bar, eval=FALSE}
 
-titleText2='Are all locations getting a fair share of public schools in WA?'
+titleText2='Did Getting Rid of Secured Bike Lockers Affect How Many People Bike to Light Rail Station?'
 
+sub2='2016 Survey Shows 10% of riders used to bike to stations'
 
 par(mgp=c(1,0.5,0)) 
 location=barplot(ToPlot,
          col = paletteHereNew,
          border=NA,
          main=titleText2,
-         xlim=c(0,50), 
+         xlim=c(0,80), 
          cex.names = 0.6,
          cex.lab=0.6,
          xlab = '(in %)',
-         horiz = T
-         ) 
-
-text(x=ToPlot,y=location,labels=plotLabels,pos = 4) 
-title(sub=sourceText, adj=0,cex.sub=0.7,
-      line = 3) 
-
-# reference line
-abline(v=25,#position vertical
-       lty=3,#type
-       lwd=3)#width
-
-```
-
-Again, adding another element requires adjusting what we had. What about writing your own axis-values and reducing the bar annotations:
-
-```{r lastPlot_bar, eval=FALSE}
-
-
-
-
-
-par(mgp=c(1,0.5,0)) 
-location=barplot(ToPlot,
-         col = paletteHereNew,
-         border=NA,
-         main=titleText2,
-         xlim=c(0,50), 
-         xlab = '(in %)',
-         cex.names=0.6,
-         cex.lab=0.6,
          las=2,
          horiz = T,
          xaxt="n") # no x-axis, so I customize it below...
 
-text(x=ToPlot,y=location,labels=plotLabels,pos = 4,cex = 0.7) 
-title(sub=sourceText, adj=0,cex.sub=0.7,line = 3) 
+text(x=ToPlot,y=location,labels=plotLabels,pos = 4, cex=0.5) 
 
-#reference line
-abline(v=25,lty=3,lwd=3)
+title(sub=sub2, adj=0,cex.sub=0.7, line = 3) 
+
+# reference line
+abline(v=10,#position vertical
+       lty=3,#type
+       lwd=3)#width
+
 
 
 # customizing tick values
-newXvalues<-c(0,10,25,40,50) # you just want to show this on the axis
+newXvalues<-c(0,10,20,40,80) # you just want to show this on the axis
 axis(side=1, 
      at=newXvalues, 
      labels = newXvalues,
      cex.axis=0.8)
 
+
+
+
 ```
-
-
 
 
 
@@ -393,10 +350,10 @@ plot2 = plot1 + theme(panel.background = element_rect(fill = "white",
 
 
 #Adding Titles/Labels
-plot3 = plot2 + labs(title=titleText,
+plot3 = plot2 + labs(title=titleText2,
                      x ='Access Mode', 
                      y = '%',
-                     caption = sourceText)
+                     caption = sub2)
 
 
 #customize y axis
@@ -405,41 +362,40 @@ library(scales)
 plot4 = plot3 + scale_y_continuous(breaks=c(0,10, 25,40,80),
                                  limits = c(0, 80), # expand = c(0, 0),
                                  labels=scales::unit_format(suffix = '%')) 
-plot4
 
 
+plot5= plot4 + geom_text(aes(y = pct , 
+                            label = paste0(round(pct,2), '%')),
+                        vjust=-1, # if flipping 'hjust'
+                        size = 3)
+
+plot5
 ```
 
 
 
 ```{r refl_gg, eval=FALSE}
 #adding a reference line
-plot5 = plot4 + geom_hline(yintercept = 25, #where
+plot6 = plot5 + geom_hline (yintercept = 10, #where
                            linetype="dashed", 
                            size=1.5, #thickness
                            alpha=0.5) #transparency
-plot5
+
+plot6
 ```
 
 
 ```{r annot_gg, eval=FALSE}
 #Flipping Orientation
 
-plot6 = plot5 + geom_text(aes(y = pct , 
+
+plot7 = plot4 + geom_text(aes(y = pct , 
                             label = paste0(round(pct,2), '%')),
-                        hjust=1, # if flipping 'hjust'
+                        hjust=-.1, # if flipping 'hjust'
                         size = 3)
-
-plot6 + coord_flip()
-
-
+# wanna flip the plot?
+plot7 + coord_flip()
 ```
-
-
-
-
-
-
 
 
 
