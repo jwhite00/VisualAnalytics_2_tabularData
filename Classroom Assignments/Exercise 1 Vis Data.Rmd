@@ -1,0 +1,450 @@
+<br> 
+<center><img src="http://i.imgur.com/sSaOozN.png" width="500"></center>
+
+###Jonathan White
+
+## Course: Visual Analytics for Policy and Management
+
+### Prof. José Manuel Magallanes, PhD 
+
+_____
+
+
+# Class Example 1
+### Univariate Case
+
+_____
+
+Contents:
+
+1. [Intro.](#intro)
+
+2. [Graphs: Frequency, Pie, and Bar.](#part1) 
+
+3. [Data Processes.](#part3)
+
+    3.1 [Classification.](#part31)
+    * [Nominal Data.](#part311)
+    * [Ordinal Data.](#part312)
+    
+    3.2 [Counting.](#part32)
+    
+    3.3 [Measurement.](#part33) 
+    
+
+__________
+
+
+
+###############INTRO: Loading Data and Describing the Data ###################
+<a id='intro'></a>
+
+
+```{r}
+#Loading the Data
+
+link = "https://raw.githubusercontent.com/jwhite00/VisualAnalytics_2_tabularData/master/data/Link%20Data.csv"
+
+mydata=read.csv(link)
+
+
+```
+
+
+```{r dataDimension, eval=FALSE}
+#number of rows and columns: nrow(mydata) ncol(mydata)
+
+dim(mydata) 
+
+
+```
+
+
+```{r column_Names, eval=FALSE}
+#list of the 24 columns
+
+names(mydata) 
+```
+
+
+
+```{r dataSTR, eval=FALSE}
+# data type.  'width = n,strict.width='cut' means you see n characters per row
+
+str(mydata,width = 70,strict.width='cut')
+
+```
+
+
+
+```{r head, eval=FALSE}
+#first fifty values
+#Note about data: #Null! is missing values in this data set
+
+head(mydata$access_mode,50) 
+
+
+```
+
+
+
+[Go to table of contents.](#part1)
+
+
+
+
+
+
+#############PART 1: Graphs: Frequency, Pie, and Bar #####################
+
+<a id='part1'></a>
+
+
+
+#Frequency:
+
+```{r freqTab_abs, eval=FALSE}
+# absolute values
+table(mydata$access_mode,exclude = '#NULL!')
+```
+
+
+```{r freqTab_rel, eval=FALSE}
+# as a percentage of total
+absoluteT=table(mydata$access_mode,exclude = '#NULL!')
+prop.table(absoluteT)
+
+```
+
+
+```{r namesFre_NA, eval=FALSE}
+ToPlot=prop.table(absoluteT)
+names(ToPlot)
+```
+
+
+```{r alterTable, eval=FALSE}
+# preparing labels (i.e. changing from decimal to percent)
+
+names(ToPlot)[1]='Walking/Wheelchair'
+names(ToPlot)[2]='Dropped off'
+names(ToPlot)[3]='Drove alone'
+names(ToPlot)[4]='Carpool/Vanpool'
+names(ToPlot)[5]='Bicycled'
+names(ToPlot)[6]='Other'
+
+
+ToPlot*100
+ToPlot=ToPlot*100
+paste0(round(ToPlot,2),'%')
+plotLabels=paste0(round(ToPlot,2),'%')  # labels for the slices
+
+
+```
+
+
+
+
+#PieCharts
+
+
+```{r pieTitle_question, eval=FALSE}
+#Making the Title of the Chart
+
+titleText='How are people getting to Link Light Rail Stations'
+sourceText='Source: Sound Transit 2015 Onboard Survey Data'
+
+
+# customizing set of colors
+paletteHere=rainbow(length(ToPlot)) 
+
+paletteHereNew=c('gray') # just one color
+
+```
+
+
+
+```{r rainbowColor, eval=FALSE}
+
+# the pie plots the table:
+
+pie(x=ToPlot,#table
+    col = paletteHere, 
+    labels = plotLabels,
+    main=titleText,
+    sub=sourceText)
+
+#legend
+legend(x="right", #where
+       legend=names(ToPlot), #text
+       fill = paletteHere, #symbols' colors
+       bty = 'n', # no box
+       cex = 0.5  # shrink
+       ) #symbols' colors
+
+
+
+```
+
+
+
+
+
+###############################Bar Chart#####################################
+
+
+```{r barplot1, eval=FALSE}
+
+# barplot plots the table too
+
+
+# plotting
+location=barplot(ToPlot,
+     col = paletteHereNew,
+     border=NA,
+     main=titleText,
+     sub=sourceText,
+     ylim=c(0,50),
+     ylab = '(in %)')
+
+#annotating
+text(x=location,y=ToPlot,labels=plotLabels,
+     pos = 1,# if pos=3, text will be on top of bar
+     cex = 0.8) 
+
+```
+
+
+
+
+```{r categoryNames, eval=FALSE}
+#Flipping the Bar Graph Horizontal
+
+
+location=barplot(ToPlot,
+         col = paletteHereNew,
+         border=NA,
+         main=titleText,
+         cex.names = 0.5, #shrink category names
+         xlim=c(0,50), #change to xlim
+         xlab = '(in %)', #change to xlab
+         horiz = T)  # ORIENTATION
+
+#annotating
+text(x=ToPlot,y=location, #change of x and y
+     labels=plotLabels,
+     pos = 4)  # change position of the label
+
+
+title(sub=sourceText, 
+      adj=0,#adj=1 aligns to rigth.
+      cex.sub=0.7) #shrinking text
+
+
+
+###* To have the label of the x-axis closer to the axis itself, we need to alter the _graphical parameters_:
+
+# changing parameters
+# (distanceOfUnit To plot, 
+# distanceOfAxislabels to plot,
+# distance ofTicks to plot)
+# default is: mgp=c(3, 1, 0)
+
+par(mgp=c(0.5,0.5,0)) 
+#####
+
+location=barplot(ToPlot,
+         col = paletteHereNew,
+         border=NA,
+         main=titleText,
+         xlim=c(0,50), 
+         xlab = '(in %)',
+         cex.names = 0.6,
+         cex.lab=0.6, # shrinking label text
+         horiz = T) 
+
+text(x=ToPlot,y=location,labels=plotLabels,pos = 4) 
+
+title(sub=sourceText, adj=0,cex.sub=0.7,
+      line = 3) #push the text down
+
+
+
+
+```
+
+
+
+
+###Adding a Reference Line
+
+```{r refLine_bar, eval=FALSE}
+
+titleText2='Are all locations getting a fair share of public schools in WA?'
+
+
+par(mgp=c(1,0.5,0)) 
+location=barplot(ToPlot,
+         col = paletteHereNew,
+         border=NA,
+         main=titleText2,
+         xlim=c(0,50), 
+         cex.names = 0.6,
+         cex.lab=0.6,
+         xlab = '(in %)',
+         horiz = T
+         ) 
+
+text(x=ToPlot,y=location,labels=plotLabels,pos = 4) 
+title(sub=sourceText, adj=0,cex.sub=0.7,
+      line = 3) 
+
+# reference line
+abline(v=25,#position vertical
+       lty=3,#type
+       lwd=3)#width
+
+```
+
+Again, adding another element requires adjusting what we had. What about writing your own axis-values and reducing the bar annotations:
+
+```{r lastPlot_bar, eval=FALSE}
+
+
+
+
+
+par(mgp=c(1,0.5,0)) 
+location=barplot(ToPlot,
+         col = paletteHereNew,
+         border=NA,
+         main=titleText2,
+         xlim=c(0,50), 
+         xlab = '(in %)',
+         cex.names=0.6,
+         cex.lab=0.6,
+         las=2,
+         horiz = T,
+         xaxt="n") # no x-axis, so I customize it below...
+
+text(x=ToPlot,y=location,labels=plotLabels,pos = 4,cex = 0.7) 
+title(sub=sourceText, adj=0,cex.sub=0.7,line = 3) 
+
+#reference line
+abline(v=25,lty=3,lwd=3)
+
+
+# customizing tick values
+newXvalues<-c(0,10,25,40,50) # you just want to show this on the axis
+axis(side=1, 
+     at=newXvalues, 
+     labels = newXvalues,
+     cex.axis=0.8)
+
+```
+
+
+
+
+
+##########PART 2: GGPLOT
+
+
+```{r ggplot_call, warning=FALSE}
+#loading ggplot2 plugin
+library(ggplot2)
+```
+
+
+
+```{r ggplot1, eval=FALSE}
+#creating table to be used by ggplot
+
+tableFreq=as.data.frame(ToPlot)
+
+names(tableFreq)=c("access_mode","pct")
+
+#you have:
+tableFreq[order(-tableFreq$pct),]
+tableFreq0 = tableFreq[order(-tableFreq$pct),] #setup for allowing us to order
+
+```
+
+
+
+
+```{r bar_gg, eval=FALSE}
+#base GGPLOT2 starts with a "base", telling WHAT VARIABLES TO PLOT
+base= ggplot(data = tableFreq0, 
+             aes(x = reorder(access_mode,pct), #command for ordering
+                 y = pct)) 
+
+
+#initial bar graph
+plot1 = base + geom_bar(fill ="gray",
+                        stat = 'identity') # y is just what it is!
+
+
+#Use Less ink
+plot2 = plot1 + theme(panel.background = element_rect(fill = "white",
+                                                    colour = "grey50"),
+                    plot.caption = element_text(hjust = 0), # default was 1
+                    plot.title = element_text(hjust = 0.5))
+
+
+#Adding Titles/Labels
+plot3 = plot2 + labs(title=titleText,
+                     x ='Access Mode', 
+                     y = '%',
+                     caption = sourceText)
+
+
+#customize y axis
+library(scales)
+
+plot4 = plot3 + scale_y_continuous(breaks=c(0,10, 25,40,80),
+                                 limits = c(0, 80), # expand = c(0, 0),
+                                 labels=scales::unit_format(suffix = '%')) 
+plot4
+
+
+```
+
+
+
+```{r refl_gg, eval=FALSE}
+#adding a reference line
+plot5 = plot4 + geom_hline(yintercept = 25, #where
+                           linetype="dashed", 
+                           size=1.5, #thickness
+                           alpha=0.5) #transparency
+plot5
+```
+
+
+```{r annot_gg, eval=FALSE}
+#Flipping Orientation
+
+plot6 = plot5 + geom_text(aes(y = pct , 
+                            label = paste0(round(pct,2), '%')),
+                        hjust=1, # if flipping 'hjust'
+                        size = 3)
+
+plot6 + coord_flip()
+
+
+```
+
+
+
+
+
+
+
+
+
+
+_____
+[Go to table of contents.](#part1)
+
+[Back to course schedule menu](https://evansdatascience.github.io/VisualAnalytics/)
