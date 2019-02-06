@@ -123,8 +123,8 @@ plotLabels=paste0(round(ToPlot,2),'%')  # labels for the slices
 
 ```{r pieTitle_question, eval=FALSE}
 #Making the Title of the Chart
-
-titleText3='Biking to Link Stations vs. All Other Modes of Travel'
+titleText2= 'Did Getting Rid of Secured Bike Lockers Affect How Many People Bike to Light Rail Station?'
+titleText3= 'What is preventing a more equal distribution of Travel'
 sourceText='Source: Sound Transit 2015 Onboard Survey Data'
 
 
@@ -148,8 +148,11 @@ paletteHereNew=c('gray') # just one color
 We could use our reference line to show gaps or differences. In this case, the **Lollipop** plot may be useful. This one is just a replacement for a bar plot:
 
 ```{r lolli_gg, eval=FALSE}
+tableFreq[order(tableFreq$pct),]
+# reordering DF steps:
+tableFreqO=tableFreq[order(tableFreq$pct),]
 
-base = ggplot(tableFreq, aes(x=access_mode,pct)) 
+base = ggplot(tableFreq0, aes(x=access_mode,pct)) 
 lolliplot1=base + geom_segment(aes(y = 0, 
                                    x = access_mode, 
                                    yend = pct, 
@@ -168,88 +171,62 @@ lolliplot4 = lolliplot3 + theme(panel.background = element_rect(fill = "white",
                     plot.title = element_text(hjust = 0.5))
 
 
-lolliplot4
+lolliplot5 = lolliplot4 + scale_x_discrete(limits=tableFreqO$access_mode)
+
+lolliplot5
 ```
 
-You can get:
-```{r lolli_ord_gg, eval=FALSE}
-tableFreq[order(tableFreq$pct),]
-# reordering DF steps:
-tableFreqO=tableFreq[order(tableFreq$pct),]
 
 
-base = ggplot(tableFreqO, aes(access_mode,pct)) 
-lolliplot1=base + geom_segment(aes(y = 0, 
-                                   x = access_mode, 
-                                   yend = pct, 
-                                   xend = access_mode), color = "gray") 
-lolliplot2 = lolliplot1 + geom_point()
-lolliplot2 + scale_x_discrete(limits=tableFreqO$access_mode) # key element
-
-
-
-```
-
-And, what about changing the axis values so that we can identify the gaps:
 
 ```{r lolli_axis_gg, eval=FALSE}
 ####### new variable
-tableFreqO$gap=tableFreqO$pct-1.57
+tableFreqO$gap=tableFreqO$pct-20
 #########
 
+# a new column for color
+tableFreqO$PositiveGap=ifelse(tableFreqO$gap>0,T,F)
 
 # plot the new variable
-base = ggplot(tableFreqO, aes(access_mode,gap)) 
-
-lolliplot1=base + geom_segment(aes(y = 0, 
-                                   x = access_mode, 
-                                   yend = gap, 
-                                   xend = access_mode), color = "gray") 
-lolliplot2 = lolliplot1 + geom_point()
-lolliplot2 + scale_x_discrete(limits=tableFreqO$access_mode) # key element
-
-```
-
-Maybe add some color:
-```{r lolli_gg_color, eval=FALSE}
-# a new column for color
-tableFreqO$PositiveGap=ifelse(tableFreqO$gap>0,T,F)
-
-# add new aesthetics 'color'
-base = ggplot(tableFreqO, aes(access_mode,gap,
-                              color=PositiveGap)) #change
-lolliplot1=base + geom_segment(aes(y = 0, 
-                                   x = access_mode, 
-                                   yend = gap, 
-                                   xend = access_mode), color = "gray") 
-lolliplot2 = lolliplot1 + geom_point()
-lolliplot2 + scale_x_discrete(limits=tableFreqO$access_mode) # key element
-```
-
-Maybe add some extra info:
-```{r lolli_annot_gg, eval=FALSE}
-# a new column for color
-tableFreqO$PositiveGap=ifelse(tableFreqO$gap>0,T,F)
-
 base = ggplot(tableFreqO, aes(access_mode,gap,color=PositiveGap,
                               label = round(gap,3))) #  change
+
 lolliplot1=base + geom_segment(aes(y = 0, 
                                    x = access_mode, 
                                    yend = gap, 
                                    xend = access_mode), color = "gray") 
-lolliplot2=lolliplot1 + geom_point() 
-lolliplot3= lolliplot2 + scale_x_discrete(limits=tableFreqO$access_mode) 
+lolliplot2 = lolliplot1 + geom_point()
+
+lolliplot3 = lolliplot2 + scale_x_discrete(limits=tableFreqO$access_mode) # key element
+
+
+lolliplot4 = lolliplot3 + labs(title=titleText3,
+                     x ='Access Mode', 
+                     y = '%',
+                     caption = sourceText)
+
+lolliplot5 = lolliplot4 + theme(panel.background = element_rect(fill = "white",
+                                                    colour = "grey50"),
+                    plot.caption = element_text(hjust = 0), # default was 1
+                    plot.title = element_text(hjust = 0.5))
+
+
+
 # annotating and moving the text on the horizontal
-lolliplot3 + geom_text(nudge_x=0.3) 
+lolliplot6 = lolliplot5 + geom_text(nudge_x=0.3,show.legend = FALSE)  
+
+lolliplot6
+
+
+
+
+
+
 
 ```
 
-You can avoid the overlaping symbols in the legend by using:
-```{r nudge_gg, eval=FALSE}
-lolliplot3 + geom_text(nudge_x=0.3,show.legend = FALSE) 
-```
 
-<span style="color:red"> Exercise:<br>Complete adding the elements missing in the last plot. </span>
+
 
 
 
