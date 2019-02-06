@@ -10,7 +10,7 @@
 _____
 
 
-# Class Examples
+# Class Exercise 2
 ### Univariate Case
 
 _____
@@ -19,7 +19,7 @@ Contents:
 
 1. [Intro.](#intro)
 
-2. [Graphs: Frequency, Pie, and Bar.](#part1) 
+2. [Loliplot.](#part1) 
 
 3. [Data Processes.](#part3)
 
@@ -35,8 +35,10 @@ Contents:
 __________
 
 
-<a id='intro'></a>
+
 ###############INTRO: Loading Data and Describing the Data ###################
+<a id='intro'></a>
+
 
 ```{r}
 #Loading the Data
@@ -49,14 +51,17 @@ mydata=read.csv(link)
 ```
 
 
-```{r dataDimension, eval=FALSE}
-#number of rows and columns: nrow(mydata) ncol(mydata)
-
-dim(mydata) 
-
+```{r ggplot_call, warning=FALSE}
+#loading ggplot2 and scales plugins
+library(ggplot2)
+library(scales)
 
 ```
 
+
+
+
+#Reminder of Data
 
 ```{r column_Names, eval=FALSE}
 #list of the 24 columns
@@ -65,66 +70,22 @@ names(mydata)
 ```
 
 
+#Data Prep from Exercise 1 Carried Over
 
-```{r dataSTR, eval=FALSE}
-# data type.  'width = n,strict.width='cut' means you see n characters per row
-
-str(mydata,width = 70,strict.width='cut')
-
-```
-
-
-
-```{r head, eval=FALSE}
-#first fifty values
-#Note about data: #Null! is missing values in this data set
-
-head(mydata$access_mode,50) 
-
-
-```
-
-[Go to table of contents.](#part1)
-
-
-
-
-
-
-
-<a id='part1'></a>
-################PART 1: Graphs: Frequency, Pie, and Bar #####################
-
-
-
-#Frequency:
 
 ```{r freqTab_abs, eval=FALSE}
-# absolute values
-table(mydata$access_mode,exclude = '#NULL!')
-```
 
-
-```{r freqTab_rel, eval=FALSE}
 # as a percentage of total
 absoluteT=table(mydata$access_mode,exclude = '#NULL!')
-prop.table(absoluteT)
-
-```
-
-
-```{r namesFre_NA, eval=FALSE}
 ToPlot=prop.table(absoluteT)
-names(ToPlot)
-```
 
-
-```{r alterTable, eval=FALSE}
-
+#creating table to be used by ggplot
+tableFreq=as.data.frame(ToPlot)
+names(tableFreq)=c("access_mode","pct")
+tableFreq0 = tableFreq[order(-tableFreq$pct),] #setup for allowing us to order
 
 
 # preparing labels (i.e. changing from decimal to percent)
-
 names(ToPlot)[1]='Walking/Wheelchair'
 names(ToPlot)[2]='Dropped off'
 names(ToPlot)[3]='Drove alone'
@@ -133,18 +94,15 @@ names(ToPlot)[5]='Bicycled'
 names(ToPlot)[6]='Other'
 
 
-ToPlot*100
+ToPlot*100   #CAN YOU GET RID OF THIS???
 ToPlot=ToPlot*100
-paste0(round(ToPlot,2),'%')
+paste0(round(ToPlot,2),'%')   #CAN YOU GET RID OF THIS???
 plotLabels=paste0(round(ToPlot,2),'%')  # labels for the slices
+
 
 
 ```
 
-
-
-
-#PieCharts
 
 
 ```{r pieTitle_question, eval=FALSE}
@@ -154,519 +112,123 @@ titleText='How are people getting to Link Light Rail Stations'
 sourceText='Source: Sound Transit 2015 Onboard Survey Data'
 
 
-
-
-
-
 # customizing set of colors
 paletteHere=rainbow(length(ToPlot)) 
 
-```
-
-
-
-```{r rainbowColor, eval=FALSE}
-
-# the pie plots the table:
-
-
-
-
-
-pie(x=ToPlot,#table
-    col = paletteHere, 
-    labels = plotLabels,
-    main=titleText,
-    sub=sourceText)
-
-#legend
-legend(x="right", #where
-       legend=names(ToPlot), #text
-       fill = paletteHere, #symbols' colors
-       bty = 'n', # no box
-       cex = 0.5  # shrink
-       ) #symbols' colors
-
-
-
-
-
-
-
-
-
-```
-
-
-
-
-
-
-
-###############################Bar Chart#####################################
-
-
-```{r barplot1, eval=FALSE}
-
-# barplot plots the table too
-
-barplot(ToPlot,
-         col = paletteHere,
-         main=titleText,
-         sub=sourceText)
-```
-
-We saved some space as no legend was needed (the less **ink** the better visual). Speaking of saving, we can get rid of the colors (they were needed to differentiate the slices). 
-
-A very important thing to consider is that axes represent some unit of measurement, so make sure that unit is shown:
-
-```{r barplot2, eval=FALSE}
 paletteHereNew=c('gray') # just one color
-# plotting
-barplot(ToPlot,
-     col = paletteHereNew,
-     border=NA, #no border
-     main=titleText,
-     sub=sourceText,
-     ylim=c(0,50),
-     ylab = '(in %)' # show unit
-     )
-```
-
-
-If you consider **annotating** the plot, you can use the labels we used before:
-
-```{r barplotAnnot, eval=FALSE}
-# plotting
-location=barplot(ToPlot,
-     col = paletteHereNew,
-     border=NA,
-     main=titleText,
-     sub=sourceText,
-     ylim=c(0,50),
-     ylab = '(in %)')
-
-#annotating
-text(x=location,y=ToPlot,labels=plotLabels,
-     pos = 1,# if pos=3, text will be on top of bar
-     cex = 0.8) 
 
 ```
-
-
-You may decide to change the **orientation** of the plot:
-
-
-```{r flipBarplot, eval=FALSE}
-# plotting
-location=barplot(ToPlot,
-     col = paletteHereNew,
-     border=NA,
-     main=titleText,
-     sub=sourceText,
-     ylim=c(0,50),
-     ylab = '(in %)',
-     horiz = T) # ORIENTATION
-
-#annotating
-text(x=location,y=ToPlot,labels=plotLabels,
-     pos = 1) # this is the position of the label
-
-```
-
-The problem above is that changing the orientation, changes the axes. Then, we need to do more work:
-
-```{r flipBarplot2, eval=FALSE}
-location=barplot(ToPlot,
-         col = paletteHereNew,
-         border=NA,
-         main=titleText,
-         sub=sourceText,
-         xlim=c(0,50), #change to xlim
-         xlab = '(in %)', #change to xlab
-         horiz = T)
-
-#annotating
-text(x=ToPlot,y=location, #change of x and y
-     labels=plotLabels,
-     pos = 4)  # change position of the label
-```
-
-A little more work on the categories names:
-
-```{r categoryNames, eval=FALSE}
-location=barplot(ToPlot,
-         col = paletteHereNew,
-         border=NA,
-         main=titleText,
-         sub=sourceText,
-         cex.names = 0.7, #shrink category names
-         xlim=c(0,50), 
-         xlab = '(in %)', 
-         horiz = T)
-
-#annotating
-text(x=ToPlot,y=location,labels=plotLabels,pos = 4)  
-```
-
-
-We made the right changes, but some things do not look well. It would be better if:
-
-* The subtitle (_source_) and the label of the x-axis were not that close. A good step will be to have the subtitle as an element of its own, which allows, for instance, to decide its alignment and size:
-
-```{r barSubtitle, eval=FALSE}
-location=barplot(ToPlot,
-         col = paletteHereNew,
-         border=NA,
-         main=titleText, # no sub here!
-         xlim=c(0,50), 
-         cex.names = 0.5,
-         xlab = '(in %)', 
-         horiz = T)
-
-# annotating
-text(x=ToPlot,y=location,labels=plotLabels,pos = 4)  
-
-# subtitle
-title(sub=sourceText, 
-      adj=0,#adj=1 aligns to rigth.
-      cex.sub=0.7) #shrinking text
-```
-
-* To have the label of the x-axis closer to the axis itself, we need to alter the _graphical parameters_:
-
-```{r mgp_Barplot, eval=FALSE}
-# changing parameters
-# (distanceOfUnit To plot, 
-# distanceOfAxislabels to plot,
-# distance ofTicks to plot)
-# default is: mgp=c(3, 1, 0)
-
-par(mgp=c(0.5,0.5,0)) 
-#####
-
-location=barplot(ToPlot,
-         col = paletteHereNew,
-         border=NA,
-         main=titleText,
-         xlim=c(0,50), 
-         xlab = '(in %)',
-         cex.names = 0.6,
-         cex.lab=0.6, # shrinking label text
-         horiz = T) 
-
-text(x=ToPlot,y=location,labels=plotLabels,pos = 4) 
-
-title(sub=sourceText, adj=0,cex.sub=0.7,
-      line = 3) #push the text down
-```
-
-* It is generally a good idea to add a **reference line**, which can represent an expected value or another relevant value. Since I have four different locations (not considering the missing ones), let me put a line to signal the 25% (uniform share among four locations):
-
-```{r refLine_bar, eval=FALSE}
-
-titleText2='Are all locations getting a fair share of public schools in WA?'
-
-
-par(mgp=c(1,0.5,0)) 
-location=barplot(ToPlot,
-         col = paletteHereNew,
-         border=NA,
-         main=titleText2,
-         xlim=c(0,50), 
-         cex.names = 0.6,
-         cex.lab=0.6,
-         xlab = '(in %)',
-         horiz = T
-         ) 
-
-text(x=ToPlot,y=location,labels=plotLabels,pos = 4) 
-title(sub=sourceText, adj=0,cex.sub=0.7,
-      line = 3) 
-
-# reference line
-abline(v=25,#position vertical
-       lty=3,#type
-       lwd=3)#width
-
-```
-
-Again, adding another element requires adjusting what we had. What about writing your own axis-values and reducing the bar annotations:
-
-```{r lastPlot_bar, eval=FALSE}
-
-par(mgp=c(1,0.5,0)) 
-location=barplot(ToPlot,
-         col = paletteHereNew,
-         border=NA,
-         main=titleText2,
-         xlim=c(0,50), 
-         xlab = '(in %)',
-         cex.names=0.6,
-         cex.lab=0.6,
-         las=2,
-         horiz = T,
-         xaxt="n") # no x-axis, so I customize it below...
-
-text(x=ToPlot,y=location,labels=plotLabels,pos = 4,cex = 0.7) 
-title(sub=sourceText, adj=0,cex.sub=0.7,line = 3) 
-
-#reference line
-abline(v=25,lty=3,lwd=3)
-
-
-# customizing tick values
-newXvalues<-c(0,10,25,40,50) # you just want to show this on the axis
-axis(side=1, 
-     at=newXvalues, 
-     labels = newXvalues,
-     cex.axis=0.8)
-
-```
-
-
-So far, we have used the _basic_ R capabilities for plotting. 
-
-There are alternative libraries, like **ggplot2**, that are also frequently used. However, it has a different approach, which allows to add layers that let you customize your plot. The classic approach for ggplot is:
-
-* Avoid missing values and prepare frequency table. We replaced the missing values (now they are 'Unknown'). Here, you need to transform the _table_ into a **data frame**:
-
-```{r ggplot1, eval=FALSE}
-
-tableFreq=as.data.frame(ToPlot)
-
-names(tableFreq)=c("locale","pct")
-#you have:
-tableFreq[order(-tableFreq$pct),]
-
-```
-
-
-* Call the library:
-
-```{r ggplot_call, warning=FALSE}
-library(ggplot2)
-```
-
-* Create the base _object_, which is not a plot, just informing the main variables:
-
-```{r ggplot_base, eval=FALSE}
-#base GGPLOT2 starts with a "base", telling WHAT VARIABLES TO PLOT
-
-base= ggplot(data = tableFreq, 
-             aes(x = locale,
-                 y = pct)) 
-
-```
-
-* On top of the previous object, add the layer that produces the main plots (the next layers will add or customize elements in the plot):
-
-```{r bar_gg, eval=FALSE}
-
-
-plot1 = base + geom_bar(fill ="gray",
-                        stat = 'identity') # y is just what it is!
-plot1
-```
-
-* We can now pay attention to the titles:
-
-```{r title_gg, eval=FALSE}
-plot2 = plot1 + labs(title=titleText2,
-                     x =NULL, 
-                     y = NULL,
-                     caption = sourceText)
-plot2
-
-```
-
-* Add the reference lines:
-
-```{r refl_gg, eval=FALSE}
-plot3 = plot2 + geom_hline(yintercept = 25, #where
-                           linetype="dashed", 
-                           size=1.5, #thickness
-                           alpha=0.5) #transparency
-plot3
-```
-
-* Customize the axes:
-
-```{r units_gg, eval=FALSE}
-library(scales)
-
-# customize Y axis
-plot4 = plot3 + scale_y_continuous(breaks=c(0,10, 25,40,50),
-                                 limits = c(0, 50), # expand = c(0, 0),
-                                 labels=scales::unit_format(suffix = '%')) 
-plot4
-```
-
-* Less ink and title/subtitle positions:
-```{r title2_gg, eval=FALSE}
-plot5 = plot4 + theme(panel.background = element_rect(fill = "white",
-                                                    colour = "grey50"),
-                    plot.caption = element_text(hjust = 0), # default was 1
-                    plot.title = element_text(hjust = 0.5))
-plot5
-```
-
-* annotating the bars:
-
-```{r annot_gg, eval=FALSE}
-
-plot6 = plot5 + geom_text(aes(y = pct , 
-                            label = paste0(round(pct,2), '%')),
-                        hjust=1, # if flipping 'hjust'
-                        size = 3)
-# wanna flip the plot?
-plot6 + coord_flip()
-#+ coord_flip()
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#probably cut this
-```{r pieTitle_question, eval=FALSE}
-# the pie plots the table:
-titleText='Where are Public Schools located in WA in 2019?'
-sourceText='Source: US Department of Education'
-
-```
-
-
-```{r ggplot1, eval=FALSE}
-
-tableFreq=as.data.frame(ToPlot)
-names(tableFreq)=c("locale","pct")
-#you have:
-tableFreq
-```
-################
-
-
-
-
-
-#Using GGplot
-
-* Call the library:
-
-```{r ggplot_call, warning=FALSE}
-library(ggplot2)
-```
-
-* Create the base _object_, which is not a plot, just informing the main variables:
-
-```{r ggplot_base, eval=FALSE}
-#base GGPLOT2 starts with a "base", telling WHAT VARIABLES TO PLOT
-base= ggplot(data = mydata, 
-             aes(x = age,
-                 y = Total.different...county)) 
-
-```
-
-* On top of the previous object, add the layer that produces the main plots (the next layers will add or customize elements in the plot):
-
-```{r bar_gg, eval=FALSE}
-plot1 = base + geom_bar(fill ="gray",
-                        stat = 'identity') # y is just what it is!
-plot1
-```
-
-* We can now pay attention to the titles:
-
-```{r title_gg, eval=FALSE}
-plot2 = plot1 + labs(title=titleText,
-                     x =NULL, 
-                     y = NULL,
-                     caption = sourceText)
-plot2
-
-```
-
-* Add the reference lines:
-
-```{r refl_gg, eval=FALSE}
-plot3 = plot2 + geom_hline(yintercept = 25, #where
-                           linetype="dashed", 
-                           size=1.5, #thickness
-                           alpha=0.5) #transparency
-plot3
-```
-
-* Customize the axes:
-
-```{r units_gg, eval=FALSE}
-library(scales)
-
-# customize Y axis
-plot4 = plot3 + scale_y_continuous(breaks=c(0,10, 25,40,50),
-                                 limits = c(0, 50), # expand = c(0, 0),
-                                 labels=scales::unit_format(suffix = '%')) 
-plot4
-```
-
-* Less ink and title/subtitle positions:
-```{r title2_gg, eval=FALSE}
-plot5 = plot4 + theme(panel.background = element_rect(fill = "white",
-                                                    colour = "grey50"),
-                    plot.caption = element_text(hjust = 0), # default was 1
-                    plot.title = element_text(hjust = 0.5))
-plot5
-```
-
-* annotating the bars:
-
-
-
-
-
 
 
 
 
 [Go to table of contents.](#part1)
 
-<a id='part3'></a>
+
+############################PART 1: Lolliplot #####################
 
 
-Let's see some raw values in the variable _**LocaleType**_:
-
-
-
-
-EXERCISE 2
 
 
 We could use our reference line to show gaps or differences. In this case, the **Lollipop** plot may be useful. This one is just a replacement for a bar plot:
 
 ```{r lolli_gg, eval=FALSE}
-base = ggplot(mydata, aes(x=age,Total.different...county)) 
+base = ggplot(tableFreq, aes(x=access_mode,pct)) 
 lolliplot1=base + geom_segment(aes(y = 0, 
-                                   x = age, 
-                                   yend = Total.different...county, 
-                                   xend = age), color = "grey50") 
+                                   x = access_mode, 
+                                   yend = pct, 
+                                   xend = access_mode), color = "grey50") 
 lolliplot1 + geom_point()
 ```
+
+And, if you order the data frame:
+```{r lolli_ord, eval=FALSE}
+tableFreq[order(tableFreq$pct),]
+```
+
+You can get:
+```{r lolli_ord_gg, eval=FALSE}
+
+# reordering DF steps:
+tableFreqO=tableFreq[order(tableFreq$pct),]
+
+
+base = ggplot(tableFreqO, aes(access_mode,pct)) 
+lolliplot1=base + geom_segment(aes(y = 0, 
+                                   x = access_mode, 
+                                   yend = pct, 
+                                   xend = access_mode), color = "gray") 
+lolliplot2 = lolliplot1 + geom_point()
+lolliplot2 + scale_x_discrete(limits=tableFreqO$access_mode) # key element
+```
+
+And, what about changing the axis values so that we can identify the gaps:
+
+```{r lolli_axis_gg, eval=FALSE}
+####### new variable
+tableFreqO$gap=tableFreqO$pct-25
+#########
+
+
+
+# plot the new variable
+base = ggplot(tableFreqO, aes(access_mode,gap)) 
+
+lolliplot1=base + geom_segment(aes(y = 0, 
+                                   x = access_mode, 
+                                   yend = gap, 
+                                   xend = access_mode), color = "gray") 
+lolliplot2 = lolliplot1 + geom_point()
+lolliplot2 + scale_x_discrete(limits=tableFreqO$access_mode) # key element
+
+```
+
+Maybe add some color:
+```{r lolli_gg_color, eval=FALSE}
+# a new column for color
+tableFreqO$PositiveGap=ifelse(tableFreqO$gap>0,T,F)
+
+# add new aesthetics 'color'
+base = ggplot(tableFreqO, aes(access_mode,gap,
+                              color=PositiveGap)) #change
+lolliplot1=base + geom_segment(aes(y = 0, 
+                                   x = access_mode, 
+                                   yend = gap, 
+                                   xend = access_mode), color = "gray") 
+lolliplot2 = lolliplot1 + geom_point()
+lolliplot2 + scale_x_discrete(limits=tableFreqO$access_mode) # key element
+```
+
+Maybe add some extra info:
+```{r lolli_annot_gg, eval=FALSE}
+# a new column for color
+tableFreqO$PositiveGap=ifelse(tableFreqO$gap>0,T,F)
+
+base = ggplot(tableFreqO, aes(access_mode,gap,color=PositiveGap,
+                              label = round(gap,3))) #  change
+lolliplot1=base + geom_segment(aes(y = 0, 
+                                   x = access_mode, 
+                                   yend = gap, 
+                                   xend = access_mode), color = "gray") 
+lolliplot2=lolliplot1 + geom_point() 
+lolliplot3= lolliplot2 + scale_x_discrete(limits=tableFreqO$access_mode) 
+# annotating and moving the text on the horizontal
+lolliplot3 + geom_text(nudge_x=0.3) 
+
+```
+
+You can avoid the overlaping symbols in the legend by using:
+```{r nudge_gg, eval=FALSE}
+lolliplot3 + geom_text(nudge_x=0.3,show.legend = FALSE) 
+```
+
+<span style="color:red"> Exercise:<br>Complete adding the elements missing in the last plot. </span>
+
+
+
+
+
+
 
 
 You can get:
@@ -681,6 +243,8 @@ lolliplot2 = lolliplot1 + geom_point()
 lolliplot2 + scale_x_discrete(limits=mydata$age) # key element
 
 ```
+
+
 
 And, what about changing the axis values so that we can identify the gaps:
 
@@ -700,44 +264,56 @@ lolliplot2 + scale_x_discrete(limits=mydata$age) # key element
 
 ```
 
+
+
+
 Maybe add some color:
 ```{r lolli_gg_color, eval=FALSE}
 # a new column for color
 tableFreqO$PositiveGap=ifelse(tableFreqO$gap>0,T,F)
 
 # add new aesthetics 'color'
-base = ggplot(tableFreqO, aes(locale,gap,
+base = ggplot(tableFreqO, aes(access_mode,gap,
                               color=PositiveGap)) #change
 lolliplot1=base + geom_segment(aes(y = 0, 
-                                   x = locale, 
+                                   x = access_mode, 
                                    yend = gap, 
-                                   xend = locale), color = "gray") 
+                                   xend = access_mode), color = "gray") 
 lolliplot2 = lolliplot1 + geom_point()
-lolliplot2 + scale_x_discrete(limits=tableFreqO$locale) # key element
+lolliplot2 + scale_x_discrete(limits=tableFreqO$access_mode) # key element
 ```
+
+
+
 
 Maybe add some extra info:
 ```{r lolli_annot_gg, eval=FALSE}
 # a new column for color
 tableFreqO$PositiveGap=ifelse(tableFreqO$gap>0,T,F)
 
-base = ggplot(tableFreqO, aes(locale,gap,color=PositiveGap,
+base = ggplot(tableFreqO, aes(access_mode,gap,color=PositiveGap,
                               label = round(gap,3))) #  change
 lolliplot1=base + geom_segment(aes(y = 0, 
-                                   x = locale, 
+                                   x = access_mode, 
                                    yend = gap, 
-                                   xend = locale), color = "gray") 
+                                   xend = access_mode), color = "gray") 
 lolliplot2=lolliplot1 + geom_point() 
-lolliplot3= lolliplot2 + scale_x_discrete(limits=tableFreqO$locale) 
+lolliplot3= lolliplot2 + scale_x_discrete(limits=tableFreqO$access_mode) 
 # annotating and moving the text on the horizontal
 lolliplot3 + geom_text(nudge_x=0.3) 
 
 ```
 
-You can avoid the overlaping symbols in the legend by using:
+Yo
+
+u can avoid the overlaping symbols in the legend by using:
 ```{r nudge_gg, eval=FALSE}
 lolliplot3 + geom_text(nudge_x=0.3,show.legend = FALSE) 
 ```
+
+
+
+
 
 <span style="color:red"> Exercise:<br>Complete adding the elements missing in the last plot. </span>
 
@@ -746,6 +322,32 @@ lolliplot3 + geom_text(nudge_x=0.3,show.legend = FALSE)
 
 
 [Go to table of contents.](#part1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <a id='part312'></a>
 
@@ -774,6 +376,9 @@ base + geom_bar(stat = 'identity')
 ```
 
 
+
+
+
 The x-values in this variable have **order**. That is, there is an increasing level in the values. Whenever we have an ordering, besides *concentration* we can visualize **symmetry**: if there is bias towards lower or higher values. 
 
 Bar plots help you see concentration and symmetry, but we have an alternative way to clearly detect symmetry, via **boxplots**:
@@ -790,6 +395,8 @@ box1
 
 You have symmetry when the distance of those whiskers to the  box is the same, and when the thick line is in the middle of the box. You can see that the values show a negative asymmetry (tail to the left).
 
+you can't use this analysis of symmetry with nominal values because they have no middle to be referenced against 
+
 Box plots expect a numeric value as an input, but we have an ordered categorical, so we used the _as.numeric()_ function. However, that eliminated the levels we saw in the previous bar plot; we can put the levels back in our plot:
 
 ```{r boxplot_axis_labels, eval=FALSE}
@@ -799,6 +406,19 @@ ordLabels= levels(mydata$High.Grade)
 box2 = box1 + scale_y_continuous(labels=ordLabels,breaks=1:15)
 box2
 ```
+
+```{r}
+
+box3 = box2 + theme(panel.background = element_rect(fill = "white",
+                                                    colour = "grey50")) +aes( main= 'Title')
+
+                    
+box3
+
+
+```
+
+
 
 Box plots have important statistical information. The beginning and the ending of the box indicates the first (q1) and the third quantile (q75); and the thicker line in the middle represents the median. All those values are clearly visible, but we can retrieve the values like this:
 
@@ -835,6 +455,25 @@ freq(mydata$High.Grade,style = 'rmarkdown')
 [Go to table of contents.](#part1)
 
 <a id='part32'></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### Counting
 
@@ -943,440 +582,16 @@ freq(mydata3$redLunchOrd,style = 'rmarkdown',report.nas = F)
 
 <a id='part33'></a>
 
-### Measurement
 
-A simplistic idea of measurement tells you the times a particular unit is present in the unit of analysis; which allows for the presence of decimal places. There are variables that can have negative values.
 
-Let's analyze the variable _Student.Teacher.Ratio_, but organized by county:
 
-```{r tapply,  eval=FALSE}
-# tapply(variable,group,functionToApply)
-tapply(mydata$Student.Teacher.Ratio, mydata$County, mean)
 
-```
 
-Above, I tried to compute the mean for each county, but the function _mean()_ outputs a missing value (_NA_) as the result when there is one _NA_ in the column:
 
-```{r removeMissing,  eval=FALSE}
-# strategy 1: remove missing before computing function: na.rm=T
-tapply(mydata$Student.Teacher.Ratio, mydata$County, mean,na.rm=T)
 
-```
 
-Of course, you can clean first:
 
-```{r removeMissing2, eval=FALSE}
-# strategy 2: 
-mydata4=mydata[complete.cases(mydata$Student.Teacher.Ratio),]
 
-tapply(mydata4$Student.Teacher.Ratio, 
-       mydata4$County, 
-       mean)
-```
-
-Great!
-
-Now let me plot a histogram of those means:
-
-```{r histMeans, eval=FALSE}
-# keeping strategy 2: 
-meanValues=tapply(mydata4$Student.Teacher.Ratio, 
-                  mydata4$County, 
-                  mean)
-hist(meanValues)
-```
-
-Let's compute some statistics:
-```{r summaryMeans, eval=FALSE}
-summary(meanValues)
-```
-
-You can use that info, for example, to plot the mean as a reference line:
-
-```{r plotMeans, eval=FALSE}
-#reference line
-hist(meanValues)
-abline(v=mean(meanValues),lty=3,lwd=3,col='blue')
-```
-
-Measurements are continuous values, then a **density** plot is more appealing to its nature:
-
-```{r density, eval=FALSE}
-
-mvDense=density(meanValues)
-
-plot(mvDense,main="Title",col='black',xlab=NA)
-
-abline(v=mean(meanValues),lty=3,lwd=3,col='blue') #mean
-abline(v=median(meanValues),lty=3,lwd=3,col='red')#median
-legend(x="right",
-       legend=c('mean','median'),
-       fill = c('blue','red'),bty = 'n') #no box in the legend
-```
-
-A box plot is always welcome, specially considering that it does not need reference lines. Take a look:
-```{r bixplotMeasurement,eval=FALSE}
-
-bp=boxplot(meanValues,horizontal = T,ylim=c(5,30))
-```
-
-Our plots for the mean values have a more symmetrical shape. This happens when you get mean values of groups, showing a tendency towards a bell-shaped distribution, which is ideally known as the _Gauss_ or _Normal_  distribution.
-
-Notice also that boxplots serve to detect **atypical** values (outliers), which I saved in _bp_: 
-```{r outliers, eval=FALSE}
-bp$out
-```
-
-We could annotate the boxplot like this:
-```{r boxplt_annotate, eval=FALSE}
-
-boxplot(meanValues,horizontal = T,ylim=c(5,30))
-text(x= 10, y= 0.8, labels= "Outliers are:",col='gray')
-text(x= 10, y= 0.75, 
-     labels= paste(names(bp$out)[1], 'and', names(bp$out)[2]),
-     col='gray')
-```
-
-In general, measurements and counts are prone to have outliers. It is not common to speak about outliers in categorical data since they have few levels; however, if they had many levels, we could find outliers if the variable is ordinal.
-
-From what I said above, the subjective side of finding outliers lies in the decision of **what is normal**. In the case of the boxplot, the decision has been to accept as normal the values that have a *prudent distance* from the first or last quartile. This distance is 1.5 times the difference between the quartiles (a.k.a. Interquartle Range or **IQR**). Then, if a outlier is found, the whisker ends in a position different than the actual minimum or maximal value of the data.
-
-<span style="color:red"> Exercise:<br> Do some research and make a histogram and a density plot using ggplot for the variable we just used above.
-</span>
-
-
-##################
-############
-
-
-
-########
-###############
-
-
-
-We could use our reference line to show gaps or differences. In this case, the **Lollipop** plot may be useful. This one is just a replacement for a bar plot:
-
-```{r lolli_gg, eval=FALSE}
-base = ggplot(tableFreq, aes(x=locale,pct)) 
-lolliplot1=base + geom_segment(aes(y = 0, 
-                                   x = locale, 
-                                   yend = pct, 
-                                   xend = locale), color = "grey50") 
-lolliplot1 + geom_point()
-```
-
-And, if you order the data frame:
-```{r lolli_ord, eval=FALSE}
-tableFreq[order(tableFreq$pct),]
-```
-
-You can get:
-```{r lolli_ord_gg, eval=FALSE}
-
-# reordering DF steps:
-tableFreqO=tableFreq[order(tableFreq$pct),]
-
-
-base = ggplot(tableFreqO, aes(locale,pct)) 
-lolliplot1=base + geom_segment(aes(y = 0, 
-                                   x = locale, 
-                                   yend = pct, 
-                                   xend = locale), color = "gray") 
-lolliplot2 = lolliplot1 + geom_point()
-lolliplot2 + scale_x_discrete(limits=tableFreqO$locale) # key element
-```
-
-And, what about changing the axis values so that we can identify the gaps:
-
-```{r lolli_axis_gg, eval=FALSE}
-####### new variable
-tableFreqO$gap=tableFreqO$pct-25
-#########
-
-
-
-# plot the new variable
-base = ggplot(tableFreqO, aes(locale,gap)) 
-
-lolliplot1=base + geom_segment(aes(y = 0, 
-                                   x = locale, 
-                                   yend = gap, 
-                                   xend = locale), color = "gray") 
-lolliplot2 = lolliplot1 + geom_point()
-lolliplot2 + scale_x_discrete(limits=tableFreqO$locale) # key element
-
-```
-
-Maybe add some color:
-```{r lolli_gg_color, eval=FALSE}
-# a new column for color
-tableFreqO$PositiveGap=ifelse(tableFreqO$gap>0,T,F)
-
-# add new aesthetics 'color'
-base = ggplot(tableFreqO, aes(locale,gap,
-                              color=PositiveGap)) #change
-lolliplot1=base + geom_segment(aes(y = 0, 
-                                   x = locale, 
-                                   yend = gap, 
-                                   xend = locale), color = "gray") 
-lolliplot2 = lolliplot1 + geom_point()
-lolliplot2 + scale_x_discrete(limits=tableFreqO$locale) # key element
-```
-
-Maybe add some extra info:
-```{r lolli_annot_gg, eval=FALSE}
-# a new column for color
-tableFreqO$PositiveGap=ifelse(tableFreqO$gap>0,T,F)
-
-base = ggplot(tableFreqO, aes(locale,gap,color=PositiveGap,
-                              label = round(gap,3))) #  change
-lolliplot1=base + geom_segment(aes(y = 0, 
-                                   x = locale, 
-                                   yend = gap, 
-                                   xend = locale), color = "gray") 
-lolliplot2=lolliplot1 + geom_point() 
-lolliplot3= lolliplot2 + scale_x_discrete(limits=tableFreqO$locale) 
-# annotating and moving the text on the horizontal
-lolliplot3 + geom_text(nudge_x=0.3) 
-
-```
-
-You can avoid the overlaping symbols in the legend by using:
-```{r nudge_gg, eval=FALSE}
-lolliplot3 + geom_text(nudge_x=0.3,show.legend = FALSE) 
-```
-
-<span style="color:red"> Exercise:<br>Complete adding the elements missing in the last plot. </span>
-
-
-
-
-
-
-
-
-##################################################
-##########Stop here, exercise to be continued ####
-
-
-
-[Go to table of contents.](#part1)
-
-<a id='part312'></a>
-
-#### <span style="color:blue"> 2. Visualization for ordinal scales</span>
-
-For this section, we will use the variable that tells us the highest grade offered in a school. A simple exploration gives:
-
-```{r ordinalTable, eval=FALSE}
-table(mydata$High.Grade,exclude = 'nothing')
-```
-
-Being a categorical variable, the default option is again the bar plot. So let's prepare the frequency table as a data frame:
-
-```{r tableAsDF, eval=FALSE}
-frqTabO=as.data.frame(prop.table(table(mydata$High.Grade)))
-names(frqTabO)=c('grade','pct')
-frqTabO
-```
-
-Now, we can use ggplot:
-
-```{r ordTable_gg, eval=FALSE}
-
-base = ggplot(frqTabO,aes(x=grade,y=pct))
-base + geom_bar(stat = 'identity') 
-
-##always plot identity in bar plot, tells us to just use the value of the y and don't do anything to change it 
-```
-
-
-The x-values in this variable have **order**. That is, there is an increasing level in the values. Whenever we have an ordering, besides *concentration* we can visualize **symmetry**: if there is bias towards lower or higher values. 
-
-Bar plots help you see concentration and symmetry, but we have an alternative way to clearly detect symmetry, via **boxplots**:
-
-```{r boxplot_gg, eval=FALSE}
-# boxplots do not use frequency tables
-
-# as.numeric produces turns levels of the factor into numbers
-box1 = ggplot(mydata, aes(y=as.numeric(High.Grade))) 
-box1 = box1 + geom_boxplot() + coord_flip() # to show it horizontally
-
-box1
-```
-
-You have symmetry when the distance of those whiskers to the  box is the same, and when the thick line is in the middle of the box. You can see that the values show a negative asymmetry (tail to the left).
-
-you can't use this analysis of symmetry with nominal values because they have no middle to be referenced against 
-
-Box plots expect a numeric value as an input, but we have an ordered categorical, so we used the _as.numeric()_ function. However, that eliminated the levels we saw in the previous bar plot; we can put the levels back in our plot:
-
-```{r boxplot_axis_labels, eval=FALSE}
-# the labels use the original ordinal levels
-ordLabels= levels(mydata$High.Grade)
-
-box2 = box1 + scale_y_continuous(labels=ordLabels,breaks=1:15)
-box2
-```
-
-```{r}
-
-box3 = box2 + theme(panel.background = element_rect(fill = "white",
-                                                    colour = "grey50")) +aes( main= 'Title')
-
-                    
-box3
-
-
-```
-
-
-
-Box plots have important statistical information. The beginning and the ending of the box indicates the first (q1) and the third quantile (q75); and the thicker line in the middle represents the median. All those values are clearly visible, but we can retrieve the values like this:
-
-```{r box_quarts, eval=FALSE}
-#get positions
-# using 'ggplot_build'
-pos_q1=     ggplot_build(box2)$data[[1]]$lower
-pos_median= ggplot_build(box2)$data[[1]]$middle
-pos_q3=     ggplot_build(box2)$data[[1]]$upper
-
-# using
-levels(mydata$High.Grade)[c(pos_q1,pos_median,pos_q3)]
-```
-
-From the information retrieved, we know:
-
-* 25% of the public Schools offer at most 5th GRADE. 
-* 50% of the public Schools offer at most 8th GRADE.
-* 75% of the public Schools offer at most 12th GRADE. Also, 25% of the schools offer at least 12th grade.
-
-We can find these results with a _detailed_ frequency table; that is, instead of using the command _table_ as we did before, we could try a more advanced function:
-
-```{r advancedTable, warning=FALSE,results='asis', eval=FALSE}
-library(summarytools)
-freq(mydata$High.Grade,style = 'rmarkdown')
-```
-
-
-
-<span style="color:red"> Exercise:<br> Make sure our box plot follows the same design approach and include all the elements as in the bar plot for nominal data.
-</span>
-
-
-[Go to table of contents.](#part1)
-
-<a id='part32'></a>
-
-### Counting
-
-Counting expresses numerical values. They could be represented with bar plots if their frequency table had few different values. For example, the variable _Reduced.Lunch_ informs how many kids there are in each school that have that lunch for a reduced price.
-
-```{r unique, eval=FALSE}
-# how many unique values
-length(unique(mydata$Reduced.Lunch))
-```
-
-There are too many different values. Then, the bar plot is not a good idea (and neither a frequency table):
-
-```{r BAD_barplot, eval=FALSE}
-barplot(table(mydata$Reduced.Lunch),las=2,cex.names = 0.3,
-        main='bad idea')
-```
-
-On the other hand, when we have a numerical variable, there are more statistical values that help understand its behavior:
-
-```{r summary, eval=FALSE}
-# median close to mean?
-# median and mean far from max or min?
-# q1 distance to min is similar ti q3 distance to max?
-# how many missing?
-
-summary(mydata$Reduced.Lunch)
-```
-
-
-The bar plot produces a bar for each unique value in the data, counting how many times this value appeared. Now, we have many values, so we need to organize the data into _intervals_. The **histogram** is the basic plot when intervals are needed, you can use the basic function:
-
-```{r baseHistogram, eval=FALSE}
-mydata3=mydata[complete.cases(mydata$Reduced.Lunch),]
-dataHist=hist(mydata3$Reduced.Lunch) #saving info in dataHist
-```
-
-The width of each **bin** (bar) represents an interval of values, while its height the frequency. The histogram shows an asymmetric shape, where the bin with lowest values of the variable (between 0 and 20) are the most common (above 1000).
-
-####counting variables are going to usually have a tail to the right, biasing the distribution becasue most frequent responses will generally be 0, 1, 2, and 3 (think # of kids, etc.)
-
-Of course, ggplot has a version of histograms:
-
-```{r ggplotHistogram, eval=FALSE}
-base= ggplot(mydata3,aes(x = Reduced.Lunch))  
-h1= base + geom_histogram()
-h1 
-```
-
-Notice that you do not get the same plot. Let's see the info from the basic function:
-
-```{r infoHIST_base, eval=FALSE}
-dataHist
-```
-
-And now see the info that was used in ggplot:
-```{r infoHIST_gg, eval=FALSE}
-ggplot_build(h1)$data[[1]]
-```
-
-The first 'x' was 0 in ggplot, while it was 10 (in _$mids_) in the base graphic; from there on everything changed. And not only that, you have 16 bins in the base graphic, while you got 30 in ggplot. 
-
-Of course, you can alter that in both alternatives.
-
-Below, you can see a version where both plots are the same:
-
-```{r GGLikeBase,eval=FALSE,fig.height=7}
-#ggplot
-base= ggplot(mydata3,aes(x = Reduced.Lunch))  
-h1= base + geom_histogram(binwidth = 10,boundary=0) #changing width
-h1= h1 + stat_bin(binwidth = 10, aes(label=..count..), 
-                  geom = "text",boundary = 0,vjust=-0.5)
-h1
-```
-
-```{r baseLikeGG, eval=FALSE,fig.height=7}
-# base
-hist(mydata3$Reduced.Lunch,labels = T,xlab="Reduced Lunch")
-```
-
-Of course, you can make it a litle better:
-
-```{r, eval=FALSE,fig.height=7}
-hist(mydata3$Reduced.Lunch,labels = T,xlab="Reduced Lunch", xaxt="n") 
-axis(side=1, at=dataHist$breaks) # showing axis labels better
-```
-
-As mentioned before, we are plotting intervals, so the accompanying table can be built. For that, we first create the intervals into another variable:
-
-```{r makeIntervals, eval=FALSE}
-mydata3$redLunchOrd=cut(mydata3$Reduced.Lunch,
-                       breaks = dataHist$breaks,
-                       include.lowest = T,
-                       ordered_result = T)
-```
-
-And, as before, we use the _freq_ function:
-
-```{r tableIntervals, warning=FALSE,results='asis', eval=FALSE}
-
-# no need to show count of NAs:
-freq(mydata3$redLunchOrd,style = 'rmarkdown',report.nas = F)
-```
-
-<span style="color:red"> Exercise:<br> Make a histogram for the variable  FREE LUNCH, and make sure it has all the right elements, and get rid of unnecessary elements.
-</span>
-
-[Go to table of contents.](#part1)
-
-<a id='part33'></a>
 
 ### Measurement
 
@@ -1514,16 +729,6 @@ h1
 
 <span style="color:red"> Exercise:<br> Do some research and make a histogram and a density plot using ggplot for the variable we just used above.
 </span>
-
-
-
-
-
-
-
-
-
-
 
 
 
