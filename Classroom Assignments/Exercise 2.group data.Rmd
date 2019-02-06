@@ -1,12 +1,14 @@
 <br> 
 <center><img src="http://i.imgur.com/sSaOozN.png" width="500"></center>
 
+###Jonathan White
+
 ## Course: Visual Analytics for Policy and Management
 
 ### Prof. José Manuel Magallanes, PhD 
 
 _____
-<a id='part1'></a>
+
 
 # Class Examples
 ### Univariate Case
@@ -15,9 +17,9 @@ _____
 
 Contents:
 
-1. [Intro.](#part1)
+1. [Intro.](#intro)
 
-2. [Data Types.](#part2) 
+2. [Graphs: Frequency, Pie, and Bar.](#part1) 
 
 3. [Data Processes.](#part3)
 
@@ -33,8 +35,8 @@ Contents:
 __________
 
 
-
-#Intro: Loading Data and Describing the Data
+<a id='intro'></a>
+###############INTRO: Loading Data and Describing the Data ###################
 
 ```{r}
 #Loading the Data
@@ -82,21 +84,20 @@ head(mydata$access_mode,50)
 
 ```
 
-
-
 [Go to table of contents.](#part1)
 
-<a id='part2'></a>
 
 
 
-############################## Making Graphs##############################
 
+
+
+<a id='part1'></a>
+################PART 1: Graphs: Frequency, Pie, and Bar #####################
 
 
 
 #Frequency:
-
 
 ```{r freqTab_abs, eval=FALSE}
 # absolute values
@@ -106,7 +107,6 @@ table(mydata$access_mode,exclude = '#NULL!')
 
 ```{r freqTab_rel, eval=FALSE}
 # as a percentage of total
-
 absoluteT=table(mydata$access_mode,exclude = '#NULL!')
 prop.table(absoluteT)
 
@@ -115,12 +115,16 @@ prop.table(absoluteT)
 
 ```{r namesFre_NA, eval=FALSE}
 ToPlot=prop.table(absoluteT)
-
 names(ToPlot)
 ```
 
-We could alter the fifth label:
+
 ```{r alterTable, eval=FALSE}
+
+
+
+# preparing labels (i.e. changing from decimal to percent)
+
 names(ToPlot)[1]='Walking/Wheelchair'
 names(ToPlot)[2]='Dropped off'
 names(ToPlot)[3]='Drove alone'
@@ -128,8 +132,14 @@ names(ToPlot)[4]='Carpool/Vanpool'
 names(ToPlot)[5]='Bicycled'
 names(ToPlot)[6]='Other'
 
-```
 
+ToPlot*100
+ToPlot=ToPlot*100
+paste0(round(ToPlot,2),'%')
+plotLabels=paste0(round(ToPlot,2),'%')  # labels for the slices
+
+
+```
 
 
 
@@ -145,11 +155,8 @@ sourceText='Source: Sound Transit 2015 Onboard Survey Data'
 
 
 
-# preparing labels (i.e. changing from decimal to percent)
-ToPlot*100
-ToPlot=ToPlot*100
-paste0(round(ToPlot,2),'%')
-plotLabels=paste0(round(ToPlot,2),'%') # labels for the slices
+
+
 
 # customizing set of colors
 paletteHere=rainbow(length(ToPlot)) 
