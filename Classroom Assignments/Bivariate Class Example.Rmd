@@ -256,7 +256,9 @@ base  = ggplot(df.C, aes(x = Daytime, y = reorder(Crime, Percent), fill = Percen
 heat1 = base +  geom_tile() 
 heat2 = heat1 +scale_fill_gradient(low = "white", 
                                    high = "black")
-heat2
+
+heat2 + scale_y_discrete(limits = rev(levels(crime$crimecat)))
+
 ```
 
 Some work on the legend:
