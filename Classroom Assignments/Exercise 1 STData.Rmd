@@ -34,109 +34,60 @@ Contents:
 
 __________
 
-
-
-###############INTRO: Loading Data and Describing the Data ###################
+#INTRO: Loading Data and Describing the Data
 <a id='intro'></a>
-
 
 ```{r}
 #Loading the Data
-
 link = "https://raw.githubusercontent.com/jwhite00/VisualAnalytics_2_tabularData/master/data/Link%20Data.csv"
-
 mydata1=read.csv(link)
-
-
 ```
-
 
 ```{r dataDimension, eval=FALSE}
 #number of rows and columns: nrow(mydata1) ncol(mydata1)
-
 dim(mydata1) 
-
-
 ```
-
 
 ```{r column_Names, eval=FALSE}
 #list of the 24 columns
-
-names(mydata1) 
+names(mydata1)
 ```
-
-
 
 ```{r dataSTR, eval=FALSE}
 # data type.  'width = n,strict.width='cut' means you see n characters per row
-
 str(mydata1,width = 70,strict.width='cut')
-
 ```
-
-
 
 ```{r head, eval=FALSE}
 #first fifty values
 #Note about data: #Null! is missing values in this data set
-
 head(mydata1$access_mode,50) 
-
-
 ```
 
 
-
 [Go to table of contents.](#part1)
-
-
-
-
-
-
-#############PART 1: Graphs: Frequency, Pie, and Bar #####################
-
+#PART 1: Graphs: Frequency, Pie, and Bar
 <a id='part1'></a>
 
-
-
 #Frequency:
-
 ```{r freqTab_abs, eval=FALSE}
 # absolute values
-table(mydata1$access_mode,exclude = '#NULL!')
-
+table(mydata1$access,exclude = '#NULL!')
 #saving table
-absoluteT=table(mydata1$access_mode,exclude = '#NULL!')
+absoluteT=table(mydata1$access,exclude = '#NULL!')
 ```
 
 
 ```{r freqTab_rel, eval=FALSE}
 # as a percentage of total
 prop.table(absoluteT)
-
 #saving table
 ToPlot=prop.table(absoluteT)
 ```
 
 
-```{r namesFre_NA, eval=FALSE}
-
-names(ToPlot)
-```
-
-
 ```{r alterTable, eval=FALSE}
 # preparing labels (i.e. changing from decimal to percent)
-
-names(ToPlot)[1]='Walking/Wheelchair'
-names(ToPlot)[2]='Dropped off'
-names(ToPlot)[3]='Drove alone'
-names(ToPlot)[4]='Carpool/Vanpool'
-names(ToPlot)[5]='Bicycled'
-names(ToPlot)[6]='Other'
-
 
 ToPlot*100
 ToPlot=ToPlot*100
