@@ -1,0 +1,90 @@
+<br> 
+<center><img src="http://i.imgur.com/sSaOozN.png" width="500"></center>
+
+## Course: Visual Analytics for Policy and Management
+
+### Prof. José Manuel Magallanes, PhD 
+
+_____
+<a id='part1'></a>
+
+# Part 2: Visualizing Tabular data
+### Univariate Case
+
+_____
+
+Contents:
+
+1. [Intro.](#part1)
+
+2. [Data Types.](#part2) 
+
+3. [Data Processes.](#part3)
+
+    3.1 [Classification.](#part31)
+    * [Nominal Data.](#part311)
+    * [Ordinal Data.](#part312)
+    
+    3.2 [Counting.](#part32)
+    
+    3.3 [Measurement.](#part33) 
+    
+
+_____
+
+```{r getData, eval=FALSE}
+
+
+link='https://github.com/EvansDataScience/VisualAnalytics_2_tabularData/raw/master/data/eduwa.rda'
+load(file=url(link))
+
+library(ggplot2)
+library(scales)
+
+eduwafl=eduwa[complete.cases(eduwa$Free.Lunch),]
+
+titleText='Most schools provide free lunches to less than 500 students'
+sourceText='Source: US Department of Education'
+```
+
+
+[Go to table of contents.](#part1)
+
+<a id='part32'></a>
+
+### Counting
+```{r ggplotHistogram, eval=FALSE}
+#base
+base= ggplot(eduwafl,aes(x = Free.Lunch))  
+
+#changing width and color
+h1= base + geom_histogram(binwidth = 100,boundary=0, color='black', fill='white')
+
+#adds values above bars
+h2 = h1 + stat_bin(binwidth = 100, aes(label=..count..), geom = "text",boundary = 0,vjust=-0.5, 
+                   size = 2.9)
+
+#Titles and Axis
+h3 = h2 + labs(title=titleText, caption=sourceText, x = "Students Receiving Free Lunches", 
+               y = "# of Schools")
+
+#Title, white-out background, source 
+h4 = h3 + theme(plot.margin = unit(c(1,1,.5,.5), 'cm'),
+                text = element_text(colour = 'black'), 
+                plot.title = element_text(hjust=0.5, vjust=4, size = 15, face='bold'), 
+                panel.background = element_rect(fill = 'white'),
+                plot.caption = element_text(size=9),
+                axis.ticks.y = element_blank(),
+                axis.text.y= element_blank())
+                
+#ticks and reference line
+h5 = h4 + scale_x_continuous(breaks=c(0,250,500,750,1000,1250,1500,1750,1000),
+                        limits=c(0,2000)) + geom_vline(xintercept = 500, linetype="dashed",
+                                                       size=1, alpha=.4)
+
+h5
+
+```
+
+
+
