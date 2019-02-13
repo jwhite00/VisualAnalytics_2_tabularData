@@ -1,0 +1,73 @@
+<br> 
+<center><img src="http://i.imgur.com/sSaOozN.png" width="500"></center>
+
+## Visual Analytics for Policy and Management Exercise 1
+
+
+### Univariate Case
+
+
+### By Jonathan White
+
+
+_____
+<a id='part1'></a>
+
+# Part 2: Visualizing Tabular data
+
+
+_____
+
+Contents:
+
+1. [Intro.](#part1)
+
+2. [Data Types.](#part2) 
+
+3. [Data Processes.](#part3)
+
+    3.1 [Classification.](#part31)
+    * [Nominal Data.](#part311)
+    * [Ordinal Data.](#part312)
+    
+    3.2 [Counting.](#part32)
+    
+    3.3 [Measurement.](#part33) 
+    
+
+_____
+
+
+
+#Data to be used 
+```{r getData, eval=TRUE}
+link='https://github.com/EvansDataScience/VisualAnalytics_2_tabularData/raw/master/data/eduwa.rda'
+
+#getting the data TABLE from the file in the cloud:
+load(file=url(link))
+```
+
+
+#insert absoluteT, and then pie plot
+
+
+
+```{r pieBasic, eval=TRUE}
+# the pie plots the table:
+absoluteT=table(eduwa$LocaleType,exclude = 'nothing')
+ToPlot=prop.table(absoluteT)
+pie(ToPlot)
+```
+
+
+
+
+
+
+
+
+
+_____
+[Go to table of contents.](#part1)
+
+[Back to course schedule menu](https://evansdatascience.github.io/VisualAnalytics/)
