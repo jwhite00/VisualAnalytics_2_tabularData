@@ -42,7 +42,7 @@ load(file=url(link))
 library(ggplot2)
 library(scales)
 
-eduwa4=eduwa[complete.cases(eduwa$Student.Teacher.Ratio),]
+
 
 
 ```
@@ -53,73 +53,17 @@ eduwa4=eduwa[complete.cases(eduwa$Student.Teacher.Ratio),]
 
 
 ```{r histMeans, eval=FALSE}
+eduwa4=eduwa[complete.cases(eduwa$Student.Teacher.Ratio),]
 # keeping strategy 2: 
 meanValues=tapply(eduwa4$Student.Teacher.Ratio, 
                   eduwa4$County, 
                   mean)
-hist(meanValues)
+
+df=as.data.frame(meanValues)
+df$county = rownames(df)
 ```
 
-Let's compute some statistics:
-```{r summaryMeans, eval=FALSE}
-summary(meanValues)
-```
 
-You can use that info, for example, to plot the mean as a reference line:
-
-```{r plotMeans, eval=FALSE}
-#reference line
-hist(meanValues)
-abline(v=mean(meanValues),lty=3,lwd=3,col='blue')
-```
-
-Measurements are continuous values, then a **density** plot is more appealing to its nature:
-
-```{r density, eval=FALSE}
-
-mvDense=density(meanValues)
-
-plot(mvDense,main="Title",col='black',xlab=NA)
-
-abline(v=mean(meanValues),lty=3,lwd=3,col='blue') #mean
-abline(v=median(meanValues),lty=3,lwd=3,col='red')#median
-legend(x="right",
-       legend=c('mean','median'),
-       fill = c('blue','red'),bty = 'n') #no box in the legend
-```
-
-A box plot is always welcome, specially considering that it does not need reference lines. Take a look:
-```{r bixplotMeasurement,eval=FALSE}
-
-bp=boxplot(meanValues,horizontal = T,ylim=c(5,30), main = "Quartile Distribution of Student-Teacher Ratio" , 
-           xlab = 'Student-Teacher Ratio')
-
-abline(v=mean(meanValues),lty=3,lwd=3,col='blue') #mean
-abline(v=median(meanValues),lty=3,lwd=3,col='red')#median
-
-legend(x="right",
-       legend=c('mean','median'),
-       fill = c('blue','red'),bty = 'n') #no box in the legend
-
-
-```
-
-Our plots for the mean values have a more symmetrical shape. This happens when you get mean values of groups, showing a tendency towards a bell-shaped distribution, which is ideally known as the _Gauss_ or _Normal_  distribution.
-
-Notice also that boxplots serve to detect **atypical** values (outliers), which I saved in _bp_: 
-```{r outliers, eval=FALSE}
-bp$out
-```
-
-We could annotate the boxplot like this:
-```{r boxplt_annotate, eval=FALSE}
-
-boxplot(meanValues,horizontal = T,ylim=c(5,30))
-text(x= 10, y= 0.8, labels= "Outliers are:",col='gray')
-text(x= 10, y= 0.75, 
-     labels= paste(names(bp$out)[1], 'and', names(bp$out)[2]),
-     col='gray')
-```
 
 In general, measurements and counts are prone to have outliers. It is not common to speak about outliers in categorical data since they have few levels; however, if they had many levels, we could find outliers if the variable is ordinal.
 
