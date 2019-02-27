@@ -40,22 +40,9 @@ As before, the nature of the data allows for some particular analytical techniqu
 This time, I will use the [data about crime](https://data.seattle.gov/Public-Safety/Crime-Data/4fs7-3vj5) from the Seattle Open Data portal:
 
 ```{r collect, eval=FALSE}
-link="https://github.com/EvansDataScience/data/raw/master/crime.RData"
-load(file = url(link))
+mydata1=read.csv("https://raw.githubusercontent.com/jwhite00/Group-Project-Data-Vis/master/Data/newLinkData.csv")
 ```
 
-
-The data available are:
-
-```{r names, eval=FALSE}
-names(crime)
-
-```
-
-A quick look will give us:
-```{r head, eval=FALSE}
-head(crime)
-```
 
 Let's see what kind of data we have:
 
