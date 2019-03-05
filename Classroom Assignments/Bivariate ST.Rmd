@@ -44,12 +44,22 @@ mydata1=read.csv("https://raw.githubusercontent.com/jwhite00/Group-Project-Data-
 ```
 
 
-Let's see what kind of data we have:
 
-```{r str, eval=FALSE}
-str(crime,width = 70,strict.width='cut')
+```{r collect, eval=FALSE}
+link="https://github.com/EvansDataScience/data/raw/master/crime.RData"
+load(file = url(link))
+library(ggplot2)  
+library(magrittr)
+library(ggrepel)
+
+library(Rmisc)
+library(tibble)
 ```
 
+
+```{r}
+names(mydata1)
+```
 
 _____
 
@@ -59,10 +69,12 @@ _____
 
 ## Categorical-Categorical relationships
 
-The main way to organize these relationships are the contingency tables. Let's select a couple of categorical variables:
+
+
+
 
 ```{r table, eval=FALSE}
-(CrimeTotal=table(crime$crimecat,crime$Occurred.DayTime))
+(RideDetail=table(mydata1$faretype,mydata1$origin))
 ```
 
 
@@ -70,8 +82,7 @@ The table above shows counts, but in most situations, it is important to see rel
 
 ```{r table_rel_PIPES,eval=FALSE}
 # using "pipes" to help readability:
-library(magrittr)
-(CrimeTotal=table(crime$crimecat,crime$Occurred.DayTime)%>% #create table and then...
+(RideDetail=table(mydata1$faretype,mydata1$origin)%>% #create table and then...
         prop.table() %>% #compute proportion and then...
         "*"(100)%>% # multiply by 100 and then...
         round(2) #...round to to decimals
@@ -82,23 +93,173 @@ Those tables show total counts or percents. However, when a table tries to hypot
 
 
 ```{r table_byCol,eval=FALSE}
-CrimeCol=table(crime$crimecat,crime$Occurred.DayTime)%>%
+RideCol=table(mydata1$faretype,mydata1$origin)%>%
          prop.table(margin = 2)%>%   # 2 is % by column
          "*"(100)%>%
          round(3)
 
-CrimeCol
+RideCol
 ```
 
 
 
 The complexity of two variables requires plots, as tables like these will not allow you to discover *association patterns* easily, even though they are already a summary of two columns. However, you must check the data format the plotting functions require, as most plots will use the contingency table as input (not the raw data).
 
-As before, we can use the bar plot with the contingency table as input:
 
-```{r BADplot,eval=FALSE}
-barplot(CrimeCol)
+This plot will need a lot of work, so the base capabilities of R may not be a good strategy.  
+
+However, when using alternative/more specialized plotting features you may need to convert your table into a dataframe of frequencies, let me create the base proportions table:
+
+```{r convertToDFgg,eval=FALSE}
+df.T=as.data.frame(RideDetail) # table of proportion based on total
+# YOU GET:
+head(df.T)
 ```
+
+We should rename the above table:
+
+
+
+```{r}
+names(df.T)=c('FareCat','Origin','Percent') #renaming
+head(df.T)
+```
+
+
+
+
+```{r}
+base  = ggplot(df.T, aes(x = reorder(FareCat, Percent), y = Percent ) ) 
+
+bars1 = base + geom_bar( stat = "identity" )
+
+
+
+bars2 = bars1 + geom_segment(aes(y = 0,
+                                   x = FareCat, 
+                                   yend = Percent, 
+                                   xend = FareCat), color = "grey50") 
+
+
+bars3 = bars2 + labs(title=titleText4,
+                     x ='Access Mode', 
+                     y = '%',
+                     caption = sourceText2)
+
+bars4 = bars3 + theme(panel.background = element_rect(fill = "white",
+                                                    colour = "grey50"),
+                    plot.caption = element_text(hjust = 0), # default was 1
+                    plot.title = element_text(hjust = 0.5))
+
+bars5 = bars4 + scale_x_discrete(limits=tableFreqO$access_mode)
+
+bars6 = bars5 + facet_wrap( ~ Origin ,nrow = 1) 
+
+bars6+ coord_flip()
+```
+
+
+
+
+
+
+
+
+
+```{r}
+#data from Bivariate ST
+
+# table of proportion based on total, gives you panel data
+df.T=as.data.frame(RideDetail) 
+
+#renaming
+names(df.T)=c('FareCat','Origin','Percent') 
+
+#independent in columns, dependent in rows
+CrimeCol=table(crime$crimecat,crime$Occurred.DayTime)%>%
+         prop.table(margin = 2)%>%   # 2 is % by column
+         "*"(100)%>%
+         round(3)
+
+
+crimeWeek=crime[(crime$DaysToReport<365) & (crime$year>=2000),]
+
+crimeWeek$WeeksToReport=crimeWeek$DaysToReport/7
+
+crimeYearGG2=crimeWeek[complete.cases(crimeWeek$WeeksToReport) &complete.cases(crimeWeek$crimecat),]
+
+#Exercise 4 prep
+# 1. MEAN of days it takes to report a crime by neighborhood
+daysByNeigh=tapply(crime$DaysToReport, crime$Neighborhood, mean,na.rm=T)
+daysByNeigh=as.data.frame(daysByNeigh)%>%rownames_to_column()
+
+# 2. PROPORTION of crimes by neighborhood
+crimesByNeigh=tapply(crime$crimecat, crime$Neighborhood, length)%>%      
+                     prop.table()%>%
+                     "*"(100)%>% 
+                     round(2) 
+crimesByNeigh=as.data.frame(crimesByNeigh)%>%rownames_to_column()
+#MERGE
+num_num=merge(daysByNeigh,crimesByNeigh) # 'row name' is the "key"
+
+```
+
+
+
+
+
+<a id='ex1'></a>
+<span style="color:red"> Exercise 1:<br> Turn the bars into lollipop with the right components.
+</span>
+
+
+```{r}
+#this is all shown above go ahead and delete 
+titleText4 = 'What Crimes Are Being Committed, \nand When?'
+sourceText2= 'City of Seattle: Open Data Portal'
+
+base  = ggplot(df.T, aes(x = reorder(FareCat, Percent), y = Percent ) ) 
+
+bars1 = base + geom_bar( stat = "identity" )
+
+
+
+bars2 = bars1 + geom_segment(aes(y = 0,
+                                   x = FareCat, 
+                                   yend = Percent, 
+                                   xend = FareCat), color = "grey50") 
+
+
+
+bars3 = bars2 + labs(title=titleText4,
+                     x ='Access Mode', 
+                     y = '%',
+                     caption = sourceText2)
+
+bars4 = bars3 + theme(panel.background = element_rect(fill = "white",
+                                                    colour = "grey50"),
+                    plot.caption = element_text(hjust = 0), # default was 1
+                    plot.title = element_text(hjust = 0.5))
+
+bars5 = bars4 + scale_x_discrete(limits=tableFreqO$access_mode)
+
+bars6 = bars5 + facet_wrap( ~ Daytime ,nrow = 1) 
+
+bars6+ coord_flip()
+
+
+
+
+
+```
+
+
+
+
+
+The complexity of two variables requires plots, as tables like these will not allow you to discover *association patterns* easily, even though they are already a summary of two columns. However, you must check the data format the plotting functions require, as most plots will use the contingency table as input (not the raw data).
+
+As before, we can use the bar plot with the contingency table as input:
 
 This plot will need a lot of work, so the base capabilities of R may not be a good strategy.  
 
@@ -239,12 +400,12 @@ Once you see a plot of two bivariate categorical data, you may consider other pl
 
 ```{r heatDescending, eval=FALSE}
 # heatplot
-base  = ggplot(df.C, aes(x = Daytime, y = reorder(Crime, Percent), fill = Percent)) 
+base  = ggplot(df.T, aes(x = Origin, y = reorder(FareCat, Percent), fill = Percent)) 
 heat1 = base +  geom_tile() 
 heat2 = heat1 +scale_fill_gradient(low = "white", 
                                    high = "black")
 
-heat2 + scale_y_discrete(limits = rev(levels(crime$crimecat)))
+heat2 + scale_y_discrete(limits = rev(levels(mydata1$faretype)))
 
 ```
 
